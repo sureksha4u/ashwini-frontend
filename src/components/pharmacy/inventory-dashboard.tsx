@@ -1,29 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Filter, Plus, Edit2, Package } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Search, Filter, Plus, Edit2, Package, Loader2 } from "lucide-react";
 import { KPICard } from "@/components/pharmacy/kpi-card";
 import { StatusBadge } from "@/components/pharmacy/status-badge";
 import { AddMedicineDrawer } from "@/components/pharmacy/add-medicine-drawer";
-import { mockMedicines, mockKPIData } from "@/lib/mock-data";
-import { Medicine } from "@/lib/types/inventory";
+import { Medicine, KPIData } from "@/lib/types/inventory";
+import { listInventory, getInventoryKPIs, kpisToCards, type InventoryFilter } from "@/lib/api/inventory";
 
 export function InventoryDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedMedicine, setSelectedMedicine] = useState<Medicine | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
+  const [kpis, setKpis] = useState<KPIData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredMedicines = mockMedicines.filter((med) => {
-    const matchesSearch = 
-      med.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (med.generic_name?.toLowerCase().includes(searchQuery.toLowerCase()) || false) ||
-      (med.category?.toLowerCase().includes(searchQuery.toLowerCase()) || false);
-    
-    const matchesFilter = filterStatus === "all" || med.status === filterStatus;
-    
-    return matchesSearch && matchesFilter;
-  });
+  // Backend already supports search + filter at the query level, so we delegate
+  // both to the API rather than client-side filtering against a snapshot.
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    const apiFilter: InventoryFilter =
+      filterStatus === "low-stock" ? "low_stock" :
+      filterStatus === "expiring" ? "expiring" :
+      "all";
+    Promise.all([
+      listInventory({ filter: apiFilter, search: searchQuery || undefined }),
+      getInventoryKPIs(),
+    ])
+      .then(([meds, k]) => {
+        if (cancelled) return;
+        setMedicines(meds);
+        setKpis(kpisToCards(k));
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : String(e));
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [filterStatus, searchQuery]);
+
+  const filteredMedicines = medicines;
 
   const handleAdd = () => {
     setSelectedMedicine(null);
@@ -39,10 +61,21 @@ export function InventoryDashboard() {
     <div className="space-y-6">
       {/* Hero KPI Section */}
       <div className="grid grid-cols-3 gap-6">
-        {mockKPIData.map((kpi, index) => (
-          <KPICard key={index} data={kpi} />
-        ))}
+        {(kpis.length ? kpis : Array.from({ length: 3 })).map((kpi, index) =>
+          kpi ? <KPICard key={index} data={kpi as KPIData} /> : (
+            <div
+              key={index}
+              className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm h-32 animate-pulse"
+            />
+          )
+        )}
       </div>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+          Failed to load inventory: {error}
+        </div>
+      )}
 
       {/* Premium Filter Bar */}
       <div className="bg-white rounded-xl border border-[#E2E8F0] p-6 shadow-sm">
@@ -126,15 +159,22 @@ export function InventoryDashboard() {
           </table>
         </div>
 
-        {/* Empty State */}
+        {/* Empty / Loading State */}
         {filteredMedicines.length === 0 && (
-          <div className="py-16 text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F8FAFC] flex items-center justify-center">
-              <Package className="w-8 h-8 text-[#CBD5E1]" strokeWidth={1.25} />
+          loading ? (
+            <div className="py-16 flex flex-col items-center text-[#64748B]">
+              <Loader2 className="w-8 h-8 animate-spin text-[#2563EB] mb-3" />
+              <p className="text-sm">Loading inventory…</p>
             </div>
-            <h3 className="text-lg font-medium text-[#0F172A] mb-1">No medicines found</h3>
-            <p className="text-sm text-[#64748B]">Try adjusting your search or filters</p>
-          </div>
+          ) : (
+            <div className="py-16 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#F8FAFC] flex items-center justify-center">
+                <Package className="w-8 h-8 text-[#CBD5E1]" strokeWidth={1.25} />
+              </div>
+              <h3 className="text-lg font-medium text-[#0F172A] mb-1">No medicines found</h3>
+              <p className="text-sm text-[#64748B]">Try adjusting your search or filters</p>
+            </div>
+          )
         )}
       </div>
 

@@ -2,19 +2,30 @@
 
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, Users, Pill, MessageSquare, 
+import {
+  LayoutDashboard, Users, Pill, MessageSquare,
   Settings, LogOut, Activity, ChevronRight, Menu, ChevronLeft
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getMe } from "@/lib/api/users";
 import type { UserResponse } from "@/lib/types";
+import type { UserRole } from "@/lib/types/role";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "staff"] },
-  { name: "Patients", href: "/patients", icon: Users, roles: ["admin", "staff"] },
-  { name: "Pharmacy", href: "/pharmacy", icon: Pill, roles: ["admin", "staff"] },
-  { name: "Messages", href: "/messages", icon: MessageSquare, count: 3, roles: ["admin", "staff"] },
+// Each nav entry declares which roles can see it. ADMIN is implicitly allowed
+// everywhere (mirrors the backend RoleChecker auto-allow).
+type NavItem = {
+  name: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  roles: UserRole[];
+  count?: number;
+};
+
+const navigation: NavItem[] = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["DOCTOR", "NURSE", "PHARMACIST", "RECEPTIONIST", "STAFF"] },
+  { name: "Patients", href: "/patients", icon: Users, roles: ["DOCTOR", "NURSE", "RECEPTIONIST"] },
+  { name: "Pharmacy", href: "/pharmacy", icon: Pill, roles: ["PHARMACIST"] },
+  { name: "Messages", href: "/messages", icon: MessageSquare, count: 3, roles: ["DOCTOR", "NURSE", "PHARMACIST", "RECEPTIONIST", "STAFF"] },
 ];
 
 export function Sidebar() {
@@ -80,9 +91,12 @@ export function Sidebar() {
       <nav className="flex-1 px-3 mt-4 space-y-1.5 overflow-x-hidden">
         {navigation
           .filter(item => {
+            // Until /users/me resolves, show every nav item — the page itself
+            // will RoleGuard. Once user is loaded, filter by role.
             if (!user) return true;
-            if (user.is_admin) return true;
-            return item.roles.includes("staff");
+            const role = (user as unknown as { role?: UserRole }).role;
+            if ((user as unknown as { is_admin?: boolean }).is_admin || role === "ADMIN") return true;
+            return Boolean(role && item.roles.includes(role));
           })
           .map((item) => {
           const isActive = pathname.startsWith(item.href);

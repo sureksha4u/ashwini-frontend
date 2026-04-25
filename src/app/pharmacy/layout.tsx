@@ -4,10 +4,14 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Pill, Users, LayoutDashboard } from "lucide-react";
 
+import { RoleGuard } from "@/components/auth/RoleGuard";
+import { PHARMACY_ROLES } from "@/lib/types/role";
+
 export default function PharmacyLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
+
   return (
+    <RoleGuard allow={PHARMACY_ROLES}>
     <div className="min-h-screen bg-[#F8FAFC] w-full overflow-y-auto">
       {/* Premium Navigation Header */}
       <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#E2E8F0]">
@@ -59,6 +63,7 @@ export default function PharmacyLayout({ children }: { children: React.ReactNode
         {children}
       </main>
     </div>
+    </RoleGuard>
   );
 }
 
