@@ -4,7 +4,7 @@ export interface ConsultationResponse {
   id: string;
   consultation_id: string;
   patient_id: string;
-  state: "waiting" | "in_consultation" | "completed" | "cancelled";
+  state: "waiting" | "calling" | "in_consultation" | "completed" | "cancelled";
   token_number: string | null;
   chief_complaint: string | null;
   diagnosis: string | null;
@@ -37,6 +37,12 @@ export async function startConsultation(patientId: string): Promise<Consultation
   return apiFetch<ConsultationResponse>("/consultations/start", {
     method: "POST",
     body: JSON.stringify({ patient_id: patientId }),
+  });
+}
+
+export async function callPatient(consultationId: string): Promise<ConsultationResponse> {
+  return apiFetch<ConsultationResponse>(`/consultations/${consultationId}/call`, {
+    method: "POST",
   });
 }
 

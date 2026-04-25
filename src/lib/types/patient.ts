@@ -1,6 +1,6 @@
 export type Gender = "Male" | "Female" | "Other";
 
-export type PatientStatus = "Waiting" | "In Consultation" | "Completed" | "X-Ray Pending" | "Done";
+export type PatientStatus = "Waiting" | "Calling" | "In Consultation" | "Completed" | "X-Ray Pending" | "Done";
 
 export interface Patient {
   id: string;

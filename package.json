@@ -6,11 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest",
+    "type-gen": "openapi-typescript https://ashwini-backend-293767082877.northamerica-northeast1.run.app/api/v1/openapi.json -o src/lib/types/schema.d.ts"
   },
   "dependencies": {
     "@types/html2canvas": "^0.5.35",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
     "html2canvas": "^1.4.1",
     "konva": "^10.2.3",
     "lucide-react": "^0.469.0",
@@ -20,16 +23,24 @@
     "react-konva": "^19.2.3",
     "react-muscle-highlighter": "^1.2.0",
     "react-odontogram": "^0.5.5",
+    "recharts": "^3.8.1",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "jsdom": "^29.0.2",
+    "openapi-typescript": "^7.13.0",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.5"
   }
 }

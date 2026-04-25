@@ -15,6 +15,6 @@ export interface RadiologyItem {
   uploaded_at: string;
 }
 
-export async function getRadiology(patientId: string): Promise<RadiologyItem[]> {
-  return apiFetch<RadiologyItem[]>(`/patients/${patientId}/radiology`);
+export async function getPatientRadiology(patientId: string): Promise<RadiologyItem[]> {
+  return apiFetch<RadiologyItem[]>(`/lookup/${patientId}/radiology`);
 }

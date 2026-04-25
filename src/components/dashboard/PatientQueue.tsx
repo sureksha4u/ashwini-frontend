@@ -107,7 +107,7 @@ export function PatientQueue() {
       {!loading && !error && (
         <div className="flex gap-3 overflow-x-auto pb-2">
           {filtered.map((q) => (
-            <PatientCard key={q.consultationId} queuePatient={q} />
+            <PatientCard key={q.consultationId} queuePatient={q} onRefresh={fetchQueue} />
           ))}
           {filtered.length === 0 && (
             <p className="text-sm text-gray-400 py-6 px-2">No patients in this category.</p>

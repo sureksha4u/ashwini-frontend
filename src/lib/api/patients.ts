@@ -32,7 +32,7 @@ function mapPatient(p: PatientInDB): Patient {
 }
 
 export async function getPatient(id: string): Promise<Patient> {
-  const data = await apiFetch<PatientInDB>(`/patients/${id}`);
+  const data = await apiFetch<PatientInDB>(`/lookup/${id}`);
   return mapPatient(data);
 }
 
@@ -47,5 +47,5 @@ export interface PatientSearchResult {
 }
 
 export async function searchPatients(query: string): Promise<PatientSearchResult[]> {
-  return apiFetch<PatientSearchResult[]>(`/patients/search?query=${encodeURIComponent(query)}`);
+  return apiFetch<PatientSearchResult[]>(`/lookup/search?query=${encodeURIComponent(query)}`);
 }

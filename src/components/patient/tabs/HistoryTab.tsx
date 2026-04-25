@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, X, ArrowLeft, FileText, Pill, ClipboardList } from "lucide-react";
-import { getHistory, type VisitHistoryItem } from "@/lib/api/history";
+import { getVisitHistory, type VisitHistoryItem } from "@/lib/api/history";
 import { getConsultation, type ConsultationResponse } from "@/lib/api/consultation";
 
 interface HistoryTabProps {
@@ -285,7 +285,7 @@ export function HistoryTab({ patientId, refreshKey }: HistoryTabProps) {
     setLoading(true);
     setError(null);
     try {
-      const data = await getHistory(patientId);
+      const data = await getVisitHistory(patientId);
       setHistory(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load history");

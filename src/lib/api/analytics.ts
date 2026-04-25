@@ -27,5 +27,5 @@ export interface AnalyticsResponse {
 }
 
 export async function getAnalytics(patientId: string): Promise<AnalyticsResponse> {
-  return apiFetch<AnalyticsResponse>(`/patients/${patientId}/analytics`);
+  return apiFetch<AnalyticsResponse>(`/lookup/${patientId}/analytics`);
 }

@@ -7,14 +7,12 @@ import { PatientHeader } from "@/components/patient/PatientHeader";
 import { PatientTabs } from "@/components/patient/PatientTabs";
 import { SendPrescriptionModal } from "@/components/patient/SendPrescriptionModal";
 import { getPatient } from "@/lib/api/patients";
-import { startConsultation, endConsultation, getLatestConsultation } from "@/lib/api/consultation";
 import { getCurrentDoctor } from "@/lib/api/doctors";
 import { getOverview } from "@/lib/api/overview";
-import { useConsultationAutoSave } from "@/lib/hooks/useConsultationAutoSave";
+import { useConsultation } from "@/lib/hooks/useConsultation";
 import type { Patient } from "@/lib/types/patient";
 import type { OverviewTabHandle } from "@/components/patient/tabs/OverviewTab";
 import type { PrescriptionTabHandle } from "@/components/patient/tabs/PrescriptionTab";
-import type { ConsultationSyncPayload } from "@/lib/api/consultation";
 
 export default function PatientConsultationPage() {
   const { id } = useParams<{ id: string }>();
@@ -27,31 +25,23 @@ export default function PatientConsultationPage() {
   const [doctorSpecialty, setDoctorSpecialty] = useState<string | null>(null);
 
   const [chiefComplaint, setChiefComplaint] = useState("");
-
-  const [consultationId, setConsultationId] = useState<string | null>(null);
-  const [consultationActive, setConsultationActive] = useState(false);
-  const [consultationLoading, setConsultationLoading] = useState(false);
-  const [latestConsultationId, setLatestConsultationId] = useState<string | null>(null);
+  const [showSendModal, setShowSendModal] = useState(false);
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
 
-  const [completedConsultationId, setCompletedConsultationId] = useState<string | null>(null);
-  const [showSendModal, setShowSendModal] = useState(false);
+  const {
+    consultation,
+    isActive,
+    loading: consultationLoading,
+    start,
+    end,
+    updatePayload,
+    markDirty,
+    forceSave
+  } = useConsultation(id);
 
-  // Refs to child tabs — used only for prescription save on end
+  // Refs to child tabs
   const overviewRef = useRef<OverviewTabHandle>(null);
   const prescriptionRef = useRef<PrescriptionTabHandle>(null);
-
-  // Ref-only: no re-render needed, auto-save hook reads it directly
-  const syncPayloadRef = useRef<ConsultationSyncPayload>({});
-
-  const updateSyncPayload = useCallback((patch: Partial<ConsultationSyncPayload>) => {
-    syncPayloadRef.current = { ...syncPayloadRef.current, ...patch };
-  }, []);
-
-  const autoSave = useConsultationAutoSave(
-    consultationId,
-    () => syncPayloadRef.current
-  );
 
   useEffect(() => {
     setLoading(true);
@@ -67,68 +57,33 @@ export default function PatientConsultationPage() {
       })
       .catch((err) => setError(err?.message ?? "Failed to load patient"))
       .finally(() => setLoading(false));
-
-    getLatestConsultation(id).then((c) => {
-      if (c) setLatestConsultationId(c.consultation_id);
-    });
   }, [id]);
 
   useEffect(() => {
-    if (autoStart && !loading && patient && !consultationActive) {
-      handleStartConsultation();
+    if (autoStart && !loading && patient && !isActive && !consultationLoading) {
+      start().catch(console.error);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoStart, loading, patient]);
+  }, [autoStart, loading, patient, isActive, consultationLoading, start]);
 
-  function handleChiefComplaintChange(value: string) {
+  const handleChiefComplaintChange = (value: string) => {
     setChiefComplaint(value);
-    updateSyncPayload({ chief_complaint: value });
-    autoSave.markDirty();
-  }
+    updatePayload({ chief_complaint: value });
+  };
 
-  async function handleStartConsultation() {
-    setConsultationLoading(true);
+  const handleEndConsultation = async () => {
     try {
-      const result = await startConsultation(id);
-      setConsultationId(result.consultation_id);
-      setConsultationActive(true);
-      syncPayloadRef.current = { chief_complaint: chiefComplaint };
-    } catch (err) {
-      console.error("Failed to start consultation", err);
-    } finally {
-      setConsultationLoading(false);
-    }
-  }
-
-  async function handleEndConsultation() {
-    if (!consultationId) return;
-    setConsultationLoading(true);
-    try {
-      // Force-flush any dirty auto-save data first
-      await autoSave.forceSave();
-
       // Save prescription tab annotation data
       await prescriptionRef.current?.save();
-
-      await endConsultation(consultationId);
-
-      setCompletedConsultationId(consultationId);
-      setConsultationActive(false);
-      setConsultationId(null);
-      setLatestConsultationId(consultationId);
-      setHistoryRefreshKey((k) => k + 1);
-      setShowSendModal(true);
+      
+      const result = await end();
+      if (result) {
+        setHistoryRefreshKey((k) => k + 1);
+        setShowSendModal(true);
+      }
     } catch (err) {
       console.error("Failed to end consultation", err);
-    } finally {
-      setConsultationLoading(false);
     }
-  }
-
-  function handleSendModalClose() {
-    setShowSendModal(false);
-    setCompletedConsultationId(null);
-  }
+  };
 
   if (loading) {
     return (
@@ -145,7 +100,7 @@ export default function PatientConsultationPage() {
     return (
       <div className="flex flex-col h-screen overflow-hidden">
         <div className="flex-1 flex items-center justify-center text-red-500 text-sm">
-          {error ?? "Patient not found"}
+          {typeof error === 'string' ? error : (error as any)?.message ?? "Patient not found"}
         </div>
       </div>
     );
@@ -156,31 +111,31 @@ export default function PatientConsultationPage() {
       <PatientHeader
         patient={patient}
         chiefComplaint={chiefComplaint}
-        isEditable={consultationActive}
+        isEditable={isActive}
         onChiefComplaintChange={handleChiefComplaintChange}
-        consultationActive={consultationActive}
+        consultationActive={isActive}
         consultationLoading={consultationLoading}
-        onStartConsultation={handleStartConsultation}
+        onStartConsultation={start}
         onEndConsultation={handleEndConsultation}
       />
 
       <PatientTabs
         patientId={id}
-        consultationId={consultationId ?? latestConsultationId}
-        isConsultationActive={consultationActive}
+        consultationId={consultation?.consultation_id ?? null}
+        isConsultationActive={isActive}
         doctorSpecialty={doctorSpecialty}
         overviewRef={overviewRef}
         prescriptionRef={prescriptionRef}
         historyRefreshKey={historyRefreshKey}
-        onSyncPayloadChange={updateSyncPayload}
-        markDirty={autoSave.markDirty}
+        onSyncPayloadChange={updatePayload}
+        markDirty={markDirty}
       />
 
-      {showSendModal && completedConsultationId && (
+      {showSendModal && consultation && (
         <SendPrescriptionModal
-          consultationId={completedConsultationId}
+          consultationId={consultation.consultation_id}
           patientPhone={patient.phone}
-          onClose={handleSendModalClose}
+          onClose={() => setShowSendModal(false)}
         />
       )}
     </div>

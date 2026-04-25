@@ -11,6 +11,6 @@ export interface VisitHistoryItem {
   treatment: string | null;
 }
 
-export async function getHistory(patientId: string): Promise<VisitHistoryItem[]> {
-  return apiFetch<VisitHistoryItem[]>(`/patients/${patientId}/history`);
+export async function getVisitHistory(patientId: string): Promise<VisitHistoryItem[]> {
+  return apiFetch<VisitHistoryItem[]>(`/lookup/${patientId}/history`);
 }

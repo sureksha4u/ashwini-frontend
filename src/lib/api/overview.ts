@@ -44,7 +44,7 @@ export interface OverviewResponse {
 }
 
 export async function getOverview(patientId: string): Promise<OverviewResponse> {
-  return apiFetch<OverviewResponse>(`/patients/${patientId}/overview`);
+  return apiFetch<OverviewResponse>(`/lookup/${patientId}/overview`);
 }
 
 export async function updateOverview(
@@ -52,7 +52,7 @@ export async function updateOverview(
   consultationId: string,
   data: { chief_complaint?: string; vitals?: VitalsUpdate; patient_summary?: string }
 ): Promise<OverviewResponse> {
-  return apiFetch<OverviewResponse>(`/patients/${patientId}/overview`, {
+  return apiFetch<OverviewResponse>(`/lookup/${patientId}/overview`, {
     method: "PUT",
     body: JSON.stringify({ consultation_id: consultationId, ...data }),
   });

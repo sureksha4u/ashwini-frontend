@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Upload, FileImage, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { getRadiology, type RadiologyItem } from "@/lib/api/radiology";
+import { getPatientRadiology, type RadiologyItem } from "@/lib/api/radiology";
 
 interface RadiologyTabProps {
   patientId: string;
@@ -19,7 +19,7 @@ export function RadiologyTab({ patientId, isEditable }: RadiologyTabProps) {
     setLoading(true);
     setError(null);
     try {
-      const data = await getRadiology(patientId);
+      const data = await getPatientRadiology(patientId);
       setReports(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load radiology");

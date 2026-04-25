@@ -25,3 +25,9 @@ coverage/
 
 # Vercel
 .vercel/
+
+# Runtime / debugging
+frontend.log
+test-results/
+playwright-report/
+debug_render.js
