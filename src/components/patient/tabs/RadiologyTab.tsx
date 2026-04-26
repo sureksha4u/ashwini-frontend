@@ -34,7 +34,7 @@ export function RadiologyTab({ patientId, isEditable }: RadiologyTabProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 py-8 text-gray-400 text-sm">
+      <div className="flex items-center gap-2 py-8 text-text-muted text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading radiology...
       </div>
@@ -48,7 +48,7 @@ export function RadiologyTab({ patientId, isEditable }: RadiologyTabProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Radiology & Imaging</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Radiology & Imaging</h2>
         {isEditable && (
           <Button icon={<Upload className="w-4 h-4" />} className="text-xs py-1.5">
             Upload Report
@@ -57,9 +57,9 @@ export function RadiologyTab({ patientId, isEditable }: RadiologyTabProps) {
       </div>
 
       {reports.length === 0 ? (
-        <div className="bg-white dark:bg-surface-dark border border-dashed border-gray-200 dark:border-border-dark rounded-xl p-12 flex flex-col items-center justify-center text-center">
-          <FileImage className="w-10 h-10 text-gray-300 mb-3" />
-          <p className="text-sm text-gray-400">No radiology reports yet</p>
+        <div className="bg-surface-1 border border-dashed border-border-subtle rounded-xl p-12 flex flex-col items-center justify-center text-center">
+          <FileImage className="w-10 h-10 text-text-muted mb-3" />
+          <p className="text-sm text-text-muted">No radiology reports yet</p>
         </div>
       ) : (
         <ul className="space-y-3">
@@ -72,18 +72,18 @@ export function RadiologyTab({ patientId, isEditable }: RadiologyTabProps) {
             return (
               <li
                 key={report.id}
-                className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-4 flex items-center justify-between"
+                className="bg-surface-1 border border-border-subtle rounded-xl p-4 flex items-center justify-between"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                     <FileImage className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <p className="text-sm font-medium text-text-primary">
                       {report.type} — {report.body_part}
                     </p>
-                    {notes && <p className="text-xs text-gray-400">{notes}</p>}
-                    <p className="text-[10px] text-gray-300 dark:text-gray-600 mt-0.5">
+                    {notes && <p className="text-xs text-text-muted">{notes}</p>}
+                    <p className="text-[10px] text-text-muted dark:text-text-secondary mt-0.5">
                       Uploaded: {uploadedDate}
                     </p>
                   </div>

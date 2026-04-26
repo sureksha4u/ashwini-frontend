@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, ArrowRight, ShieldCheck, Activity, AlertCircle } from "lucide-react";
-import { apiFetch } from "@/lib/api/client";
+import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
 import type { Token } from "@/lib/types";
+import { Logo, Wordmark } from "@/components/ui/Logo";
+import { Btn } from "@/components/ui/Btn";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -19,16 +21,18 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // Use the standard OAuth2 password flow endpoint
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/login/token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/login/token`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData,
+        },
+      );
 
       if (!res.ok) {
         const data = await res.json();
@@ -36,134 +40,152 @@ export default function LoginPage() {
       }
 
       const data: Token = await res.json();
-      
-      // Store token in localStorage (for API client) and Cookie (for Middleware)
       localStorage.setItem("ashwini_token", data.access_token);
       document.cookie = `ashwini_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
-      
-      // Success redirect
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-6">
-      {/* Brand Logo */}
-      <div className="flex items-center gap-3 mb-10 group cursor-default">
-        <div className="bg-[#0F172A] p-2.5 rounded-xl shadow-lg shadow-slate-200 group-hover:scale-110 transition-transform duration-300">
-          <Activity className="w-6 h-6 text-white" />
-        </div>
+    <div className="min-h-screen w-full bg-page text-text-primary flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Soft accent backdrop — adds depth without distraction */}
+      <div
+        className="absolute inset-0 -z-10"
+        style={{
+          background:
+            "radial-gradient(800px 480px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(700px 420px at 80% 100%, var(--info-soft), transparent 60%)",
+        }}
+      />
+
+      <div className="absolute top-6 right-6">
+        <ThemeToggle />
+      </div>
+
+      <div className="flex items-center gap-3 mb-8">
+        <Logo size={36} />
         <div>
-          <h1 className="text-2xl font-bold text-[#0F172A] tracking-tight">
-            Ashwini<span className="text-[#2563EB]">HMS</span>
-          </h1>
-          <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400">
+          <Wordmark size={22} />
+          <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-text-muted mt-1">
             Clinical Excellence
           </p>
         </div>
       </div>
 
-      {/* Login Card */}
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+      <div className="w-full max-w-md bg-surface-1 rounded-2xl shadow-soft border border-border-subtle overflow-hidden">
         <div className="p-8">
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-[#0F172A]">Secure Access</h2>
-            <p className="text-slate-500 text-sm mt-1">Enter your professional credentials to continue.</p>
+          <div className="mb-7">
+            <h2 className="text-xl font-semibold text-text-primary tracking-tight">Secure Access</h2>
+            <p className="text-text-secondary text-sm mt-1">
+              Enter your professional credentials to continue.
+            </p>
           </div>
 
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-600 text-sm animate-in fade-in slide-in-from-top-2 duration-300">
-              <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="mb-5 p-3 bg-danger-soft border border-danger/20 rounded-lg flex items-start gap-2.5 text-danger text-sm">
+              <AlertCircle size={16} className="shrink-0 mt-0.5" />
               <p className="font-medium">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wider">
-                Professional Email
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#2563EB] transition-colors">
-                  <Mail className="w-4 h-4" />
-                </div>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/10 focus:border-[#2563EB] transition-all"
-                  placeholder="doctor@ashwini.hms"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-700 ml-1 uppercase tracking-wider">
-                Password
-              </label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-[#2563EB] transition-colors">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/10 focus:border-[#2563EB] transition-all"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <FormField
+              label="Professional Email"
+              icon={<Mail size={14} />}
+              type="email"
+              required
+              value={email}
+              onChange={setEmail}
+              placeholder="doctor@ashwini.hms"
+            />
+            <FormField
+              label="Password"
+              icon={<Lock size={14} />}
+              type="password"
+              required
+              value={password}
+              onChange={setPassword}
+              placeholder="••••••••"
+            />
 
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-[#2563EB] focus:ring-[#2563EB]" />
-                <span className="text-xs text-slate-600 group-hover:text-slate-900 transition-colors">Remember me</span>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border-strong text-accent focus:ring-accent"
+                />
+                <span className="text-xs text-text-secondary">Remember me</span>
               </label>
-              <button type="button" className="text-xs font-bold text-[#2563EB] hover:text-blue-700 transition-colors">
+              <button type="button" className="text-xs font-semibold text-accent hover:text-accent-hover">
                 Forgot password?
               </button>
             </div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#0F172A] hover:bg-[#1e293b] text-white py-4 rounded-xl font-bold text-sm shadow-lg shadow-slate-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
-            >
+            <Btn type="submit" full size="lg" disabled={isLoading} className="mt-2">
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
                   Sign In to Workspace
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
-            </button>
+            </Btn>
           </form>
         </div>
 
-        {/* Footer Link */}
-        <div className="bg-slate-50/50 p-6 border-t border-slate-100 flex items-center justify-center gap-2">
-          <p className="text-xs text-slate-500 font-medium">Have an invitation code?</p>
-          <button 
+        <div className="bg-surface-2 px-6 py-4 border-t border-border-subtle flex items-center justify-center gap-2">
+          <p className="text-xs text-text-secondary font-medium">Have an invitation code?</p>
+          <button
             onClick={() => router.push("/onboard")}
-            className="text-xs font-bold text-[#2563EB] hover:underline decoration-2 underline-offset-4"
+            className="text-xs font-semibold text-accent hover:underline underline-offset-4"
           >
             Activate Account
           </button>
         </div>
       </div>
 
-      {/* Trust Badge */}
-      <div className="mt-12 flex items-center gap-2 text-slate-400">
-        <ShieldCheck className="w-4 h-4" />
-        <span className="text-[11px] font-bold uppercase tracking-widest">End-to-End Encrypted Workspace</span>
+      <div className="mt-10 flex items-center gap-2 text-text-muted">
+        <ShieldCheck size={14} />
+        <span className="text-[11px] font-semibold uppercase tracking-widest">
+          End-to-End Encrypted Workspace
+        </span>
+      </div>
+    </div>
+  );
+}
+
+interface FormFieldProps {
+  label: string;
+  icon: React.ReactNode;
+  type: string;
+  required?: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}
+
+function FormField({ label, icon, type, required, value, onChange, placeholder }: FormFieldProps) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-[11px] font-semibold text-text-secondary ml-0.5 uppercase tracking-wider">
+        {label}
+      </label>
+      <div className="relative group">
+        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted group-focus-within:text-accent transition-colors">
+          {icon}
+        </div>
+        <input
+          type={type}
+          required={required}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full pl-10 pr-3.5 py-3 bg-surface-2 border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/15 focus:border-accent transition-all"
+          placeholder={placeholder}
+        />
       </div>
     </div>
   );

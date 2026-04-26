@@ -1,24 +1,31 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Bell, Search, Loader2, MessageSquare, LogOut } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Bell, Search, Loader2, Building, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { searchPatients, type PatientSearchResult } from "@/lib/api/patients";
 import { getMe } from "@/lib/api/users";
 import type { UserResponse } from "@/lib/types";
+import type { UserRole } from "@/lib/types/role";
+import { Avatar } from "@/components/ui/Avatar";
+import { RoleChip } from "@/components/ui/RoleChip";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
-export function Header() {
+interface HeaderProps {
+  breadcrumb?: string[];
+  hospital?: string;
+}
+
+function roleSlug(user: UserResponse | null): string {
+  if (!user) return "staff";
+  const u = user as unknown as { role?: UserRole; is_admin?: boolean };
+  if (u.is_admin || u.role === "ADMIN") return "admin";
+  return (u.role || "STAFF").toLowerCase();
+}
+
+export function Header({ breadcrumb = ["Workspace"], hospital = "Tilak Nagar" }: HeaderProps) {
   const router = useRouter();
   const [user, setUser] = useState<UserResponse | null>(null);
-  
-  useEffect(() => {
-    getMe()
-      .then(setUser)
-      .catch(() => {
-        router.push("/");
-      });
-  }, [router]);
-
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PatientSearchResult[]>([]);
   const [searching, setSearching] = useState(false);
@@ -26,12 +33,15 @@ export function Header() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    getMe().then(setUser).catch(() => router.push("/"));
+  }, [router]);
+
+  useEffect(() => {
     if (!query.trim()) {
       setResults([]);
       setOpen(false);
       return;
     }
-
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
@@ -47,45 +57,76 @@ export function Header() {
     }, 350);
   }, [query]);
 
-  function handleSelect(patient: PatientSearchResult) {
+  const handleSelect = (p: PatientSearchResult) => {
     setQuery("");
     setOpen(false);
-    router.push(`/patients/${patient.patient_id}`);
-  }
+    router.push(`/patients/${p.patient_id}`);
+  };
+
+  const fullName =
+    user ? `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim() || user.email : "";
 
   return (
-    <header className="h-14 bg-white dark:bg-surface-dark border-b border-gray-200 dark:border-border-dark px-6 flex items-center justify-between sticky top-0 z-50">
-      {/* Search */}
-      <div className="relative w-72">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        {searching && (
-          <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
-        )}
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onBlur={() => setTimeout(() => setOpen(false), 150)}
-          onFocus={() => results.length > 0 && setOpen(true)}
-          placeholder="Search patients, appointments..."
-          className="w-full pl-9 pr-4 py-2 text-sm bg-background-light dark:bg-navy-dark border border-gray-200 dark:border-border-dark rounded-lg outline-none focus:ring-2 focus:ring-primary/30 dark:text-gray-200 dark:placeholder-gray-500"
-        />
+    <header
+      className="h-14 flex-shrink-0 glass border-b border-border-subtle flex items-center px-5 gap-4 sticky top-0 z-40"
+      style={{ background: "var(--header-bg)" }}
+    >
+      <nav className="flex items-center gap-2 text-[13px]">
+        {breadcrumb.map((b, i) => (
+          <span key={i} className="flex items-center gap-2">
+            {i > 0 && <span className="text-text-muted">/</span>}
+            <span
+              className={
+                i === breadcrumb.length - 1
+                  ? "text-text-primary font-semibold"
+                  : "text-text-secondary font-medium"
+              }
+            >
+              {b}
+            </span>
+          </span>
+        ))}
+      </nav>
 
-        {/* Dropdown */}
+      <div className="flex-1" />
+
+      <div className="relative w-[320px]">
+        <div className="flex items-center gap-2 px-3 h-[34px] rounded-lg bg-surface-2 border border-border-subtle text-text-muted text-[13px]">
+          <Search size={14} />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onBlur={() => setTimeout(() => setOpen(false), 150)}
+            onFocus={() => results.length > 0 && setOpen(true)}
+            placeholder="Search patients, UHID, +91…"
+            className="flex-1 bg-transparent outline-none text-text-primary placeholder:text-text-muted min-w-0"
+          />
+          {searching ? (
+            <Loader2 size={12} className="animate-spin" />
+          ) : (
+            <span className="px-1.5 py-0.5 rounded bg-surface-1 border border-border-subtle text-[10px] font-mono font-semibold text-text-secondary">
+              ⌘K
+            </span>
+          )}
+        </div>
+
         {open && results.length > 0 && (
-          <ul className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-lg shadow-lg overflow-hidden z-50 max-h-64 overflow-y-auto">
+          <ul className="absolute top-full left-0 right-0 mt-1.5 bg-surface-1 border border-border-subtle rounded-lg shadow-modal overflow-hidden z-50 max-h-72 overflow-y-auto">
             {results.map((p) => (
               <li key={p.patient_id}>
                 <button
                   onMouseDown={() => handleSelect(p)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-background-light dark:hover:bg-navy-dark transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-surface-2 transition-colors"
                 >
-                  <div className="w-7 h-7 rounded-full bg-primary/10 text-primary text-xs flex items-center justify-center font-semibold shrink-0">
-                    {p.full_name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{p.full_name}</p>
-                    <p className="text-xs text-gray-400">{p.uhid} · {p.phone}</p>
+                  <Avatar name={p.full_name || "?"} role="staff" size={28} />
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium text-text-primary truncate">
+                      {p.full_name}
+                    </p>
+                    <p className="text-[11px] text-text-muted truncate">
+                      {p.uhid} · {p.phone}
+                    </p>
                   </div>
                 </button>
               </li>
@@ -94,44 +135,44 @@ export function Header() {
         )}
 
         {open && query && results.length === 0 && !searching && (
-          <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-lg shadow-lg px-4 py-3 text-sm text-gray-400 z-50">
+          <div className="absolute top-full left-0 right-0 mt-1.5 bg-surface-1 border border-border-subtle rounded-lg shadow-modal px-3 py-2.5 text-[13px] text-text-muted z-50">
             No patients found
           </div>
         )}
       </div>
 
-      {/* Right side */}
-      <div className="flex items-center gap-4">
-        <button className="relative p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-slate-500 hover:text-[#0F172A] group">
-          <MessageSquare className="w-5 h-5" strokeWidth={1.5} />
-          <span className="absolute top-2 right-2 w-2 h-2 bg-[#2563EB] rounded-full border-2 border-white ring-2 ring-blue-100/50" />
-          
-          {/* Tooltip */}
-          <span className="absolute -bottom-10 left-1/2 -translate-x-1/2 hidden group-hover:block bg-[#0F172A] text-white text-[10px] font-bold px-2 py-1 rounded whitespace-nowrap">
-            Clinical Inbox
-          </span>
-        </button>
+      <div className="flex-1" />
 
-        <button className="relative p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-slate-500 hover:text-[#0F172A]">
-          <Bell className="w-5 h-5" strokeWidth={1.5} />
-        </button>
-
-        <div className="h-8 w-px bg-slate-100 mx-2" />
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-[#2563EB]/10 flex items-center justify-center text-[#2563EB] font-bold text-xs uppercase">
-            {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
-          </div>
-          <div className="hidden sm:block text-right mr-2">
-            <p className="text-sm font-bold text-[#0F172A] leading-tight">
-              {user?.first_name} {user?.last_name}
-            </p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-              {user?.is_admin ? "Administrator" : "Clinical Staff"}
-            </p>
-          </div>
-        </div>
+      <div className="flex items-center gap-1.5 px-2.5 h-[30px] rounded-md bg-surface-2 border border-border-subtle text-xs text-text-secondary font-medium">
+        <Building size={13} />
+        <span>{hospital}</span>
+        <ChevronDown size={12} />
       </div>
+
+      <ThemeToggle />
+
+      <button
+        aria-label="Notifications"
+        className="w-9 h-9 rounded-lg border border-border-subtle bg-surface-1 text-text-secondary grid place-items-center hover:bg-surface-2 transition-colors relative"
+      >
+        <Bell size={15} strokeWidth={1.5} />
+        <span className="absolute top-1 right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-danger text-white text-[9px] font-bold grid place-items-center">
+          4
+        </span>
+      </button>
+
+      {user && (
+        <div className="flex items-center gap-2 pl-2">
+          <Avatar name={fullName || "User"} role={roleSlug(user)} size={32} />
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-semibold text-text-primary leading-tight">
+              {fullName || user.email}
+            </span>
+            <RoleChip role={roleSlug(user)} />
+          </div>
+          <ChevronDown size={14} className="text-text-muted" />
+        </div>
+      )}
     </header>
   );
 }

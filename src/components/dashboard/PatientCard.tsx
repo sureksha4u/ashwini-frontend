@@ -52,21 +52,21 @@ export function PatientCard({ queuePatient, isSelected, onRefresh }: PatientCard
       className={cn(
         "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all min-w-[130px]",
         isSelected
-          ? "border-primary bg-primary/5 dark:bg-primary/10"
-          : "border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark"
+          ? "border-accent bg-accent/5 dark:bg-accent/10"
+          : "border-border-subtle bg-surface-1"
       )}
     >
       {/* Avatar */}
-      <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-navy-dark flex items-center justify-center text-sm font-semibold text-gray-600 dark:text-gray-300">
+      <div className="w-10 h-10 rounded-full bg-surface-3 flex items-center justify-center text-sm font-semibold text-text-secondary dark:text-text-muted">
         {patient.name.charAt(0)}
       </div>
 
       {/* Info */}
       <div className="text-center">
-        <p className="text-xs font-medium text-gray-900 dark:text-gray-100 leading-tight">
+        <p className="text-xs font-medium text-text-primary leading-tight">
           {patient.name.split(" ")[0]}
         </p>
-        <p className="text-[10px] text-gray-400 mt-0.5">{tokenNumber}</p>
+        <p className="text-[10px] text-text-muted mt-0.5">{tokenNumber}</p>
       </div>
 
       <Badge label={status} variant={statusToBadgeVariant(status)} />
@@ -81,7 +81,7 @@ export function PatientCard({ queuePatient, isSelected, onRefresh }: PatientCard
               "flex-1 text-[10px] font-medium py-1 px-1.5 rounded-md border transition-colors flex items-center justify-center gap-1",
               isCalling 
                 ? "bg-amber-50 border-amber-200 text-amber-700 dark:bg-amber-900/20 dark:border-amber-800"
-                : "border-gray-200 dark:border-border-dark text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-navy-dark"
+                : "border-border-subtle text-text-secondary hover:bg-surface-2"
             )}
           >
             {calling ? (
@@ -94,7 +94,7 @@ export function PatientCard({ queuePatient, isSelected, onRefresh }: PatientCard
         ) : (
           <button
             onClick={() => router.push(`/patients/${patient.id}`)}
-            className="flex-1 text-[10px] font-medium py-1 px-1.5 rounded-md border border-gray-200 dark:border-border-dark text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-navy-dark transition-colors"
+            className="flex-1 text-[10px] font-medium py-1 px-1.5 rounded-md border border-border-subtle text-text-secondary hover:bg-surface-2 transition-colors"
           >
             View
           </button>
@@ -106,7 +106,7 @@ export function PatientCard({ queuePatient, isSelected, onRefresh }: PatientCard
             "flex-1 text-[10px] font-medium py-1 px-1.5 rounded-md transition-colors",
             isCalling 
               ? "bg-green-600 text-white hover:bg-green-700" 
-              : "bg-primary text-white hover:bg-primary/90"
+              : "bg-accent text-white hover:bg-accent/90"
           )}
         >
           Start

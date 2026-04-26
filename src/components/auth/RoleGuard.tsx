@@ -55,8 +55,8 @@ export function RoleGuard({ allow, redirectTo = "/dashboard", children }: RoleGu
 
   if (status === "loading") {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#F8FAFC]">
-        <Loader2 className="w-10 h-10 animate-spin text-[#2563EB]" />
+      <div className="h-screen w-screen flex items-center justify-center bg-page">
+        <Loader2 className="w-10 h-10 animate-spin text-accent" />
       </div>
     );
   }

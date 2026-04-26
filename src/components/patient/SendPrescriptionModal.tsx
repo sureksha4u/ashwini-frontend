@@ -72,16 +72,16 @@ export function SendPrescriptionModal({ consultationId, patientPhone, onClose }:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-surface-dark rounded-2xl shadow-2xl w-full max-w-md">
+      <div className="bg-surface-1 rounded-2xl shadow-2xl w-full max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-border-dark">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle">
           <div>
-            <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Send Prescription</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Choose how to share with the patient</p>
+            <h2 className="text-sm font-semibold text-text-primary">Send Prescription</h2>
+            <p className="text-xs text-text-muted mt-0.5">Choose how to share with the patient</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+            className="text-text-muted hover:text-text-secondary dark:hover:text-gray-200 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -92,16 +92,16 @@ export function SendPrescriptionModal({ consultationId, patientPhone, onClose }:
           {/* Copy Link */}
           <button
             onClick={handleCopyLink}
-            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group"
+            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-border-subtle hover:border-accent hover:bg-accent/5 transition-all group"
           >
-            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
               {linkCopied ? (
                 <Check className="w-5 h-5 text-green-500" />
               ) : (
                 <Link2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               )}
             </div>
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-xs font-medium text-text-primary">
               {linkCopied ? "Copied!" : "Copy Link"}
             </span>
           </button>
@@ -110,18 +110,18 @@ export function SendPrescriptionModal({ consultationId, patientPhone, onClose }:
           <button
             onClick={handleDownloadPdf}
             disabled={pdfStatus === "loading"}
-            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group disabled:opacity-60"
+            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-border-subtle hover:border-accent hover:bg-accent/5 transition-all group disabled:opacity-60"
           >
-            <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
               {pdfStatus === "loading" ? (
-                <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
               ) : pdfStatus === "done" ? (
                 <ExternalLink className="w-5 h-5 text-red-600 dark:text-red-400" />
               ) : (
                 <FileText className="w-5 h-5 text-red-600 dark:text-red-400" />
               )}
             </div>
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
+            <span className="text-xs font-medium text-text-primary">
               {pdfStatus === "loading" ? "Generating…" : "Download PDF"}
             </span>
           </button>
@@ -130,32 +130,32 @@ export function SendPrescriptionModal({ consultationId, patientPhone, onClose }:
           <button
             onClick={handleEmail}
             disabled={pdfStatus === "loading"}
-            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group disabled:opacity-60"
+            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-border-subtle hover:border-accent hover:bg-accent/5 transition-all group disabled:opacity-60"
           >
-            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
               {pdfStatus === "loading" ? (
-                <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
               ) : (
                 <Mail className="w-5 h-5 text-amber-600 dark:text-amber-400" />
               )}
             </div>
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Send via Email</span>
+            <span className="text-xs font-medium text-text-primary">Send via Email</span>
           </button>
 
           {/* WhatsApp */}
           <button
             onClick={handleWhatsApp}
             disabled={pdfStatus === "loading"}
-            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary hover:bg-primary/5 transition-all group disabled:opacity-60"
+            className="flex flex-col items-center gap-3 p-5 rounded-xl border border-border-subtle hover:border-accent hover:bg-accent/5 transition-all group disabled:opacity-60"
           >
-            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center group-hover:bg-accent/10 transition-colors">
               {pdfStatus === "loading" ? (
-                <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+                <Loader2 className="w-5 h-5 text-text-muted animate-spin" />
               ) : (
                 <MessageCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
               )}
             </div>
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-300">WhatsApp</span>
+            <span className="text-xs font-medium text-text-primary">WhatsApp</span>
           </button>
         </div>
 
@@ -169,7 +169,7 @@ export function SendPrescriptionModal({ consultationId, patientPhone, onClose }:
         <div className="px-6 pb-5 flex justify-center">
           <button
             onClick={onClose}
-            className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors underline underline-offset-2"
+            className="text-xs text-text-muted hover:text-text-secondary dark:hover:text-gray-200 transition-colors underline underline-offset-2"
           >
             Done — close this window
           </button>

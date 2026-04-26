@@ -8,6 +8,9 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
+    // Playwright specs live in /tests/*.spec.ts; vitest must NOT discover
+    // them — they import @playwright/test which only works under Playwright.
+    exclude: ['node_modules', 'dist', '.next', 'tests/**'],
   },
   resolve: {
     alias: {

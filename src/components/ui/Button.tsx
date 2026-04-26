@@ -4,9 +4,9 @@ import { ButtonHTMLAttributes } from "react";
 type ButtonVariant = "primary" | "outline" | "ghost";
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-white hover:bg-blue-600 active:bg-blue-700",
-  outline: "border border-gray-300 dark:border-border-dark text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-surface-dark",
-  ghost: "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-surface-dark",
+  primary: "bg-accent text-white hover:bg-blue-600 active:bg-blue-700",
+  outline: "border border-border-strong text-text-primary hover:bg-surface-2",
+  ghost: "text-text-secondary hover:bg-surface-2",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

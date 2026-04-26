@@ -43,7 +43,7 @@ export function DentalTemplate({ selectedParts, onPartClick, isEditable, conditi
       {/* Condition legend */}
       <div className="flex flex-wrap gap-2 justify-center">
         {conditions.map((c) => (
-          <span key={c.id} className="flex items-center gap-1 text-[10px] text-gray-500">
+          <span key={c.id} className="flex items-center gap-1 text-[10px] text-text-secondary">
             <span className="w-3 h-3 rounded-full inline-block" style={{ background: c.color }} />
             {c.label}
           </span>

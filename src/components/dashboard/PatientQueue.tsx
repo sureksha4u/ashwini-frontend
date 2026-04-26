@@ -46,14 +46,14 @@ export function PatientQueue() {
     <section>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Patient Queue</h2>
-          <span className="w-5 h-5 rounded-full bg-primary text-white text-[10px] flex items-center justify-center font-bold">
+          <h2 className="text-sm font-semibold text-text-primary">Patient Queue</h2>
+          <span className="w-5 h-5 rounded-full bg-accent text-white text-[10px] flex items-center justify-center font-bold">
             {waitingCount}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="flex rounded-lg border border-gray-200 dark:border-border-dark overflow-hidden text-xs">
+          <div className="flex rounded-lg border border-border-subtle overflow-hidden text-xs">
             {(["All", "Waiting", "Done"] as QueueFilter[]).map((f) => (
               <button
                 key={f}
@@ -61,8 +61,8 @@ export function PatientQueue() {
                 className={cn(
                   "px-3 py-1.5 font-medium transition-colors",
                   activeFilter === f
-                    ? "bg-primary text-white"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-surface-dark"
+                    ? "bg-accent text-white"
+                    : "text-text-secondary hover:bg-surface-2"
                 )}
               >
                 {f}
@@ -89,7 +89,7 @@ export function PatientQueue() {
 
       {/* States */}
       {loading && (
-        <div className="flex items-center gap-2 py-6 text-sm text-gray-400">
+        <div className="flex items-center gap-2 py-6 text-sm text-text-muted">
           <Loader2 className="w-4 h-4 animate-spin" />
           Loading queue...
         </div>
@@ -110,7 +110,7 @@ export function PatientQueue() {
             <PatientCard key={q.consultationId} queuePatient={q} onRefresh={fetchQueue} />
           ))}
           {filtered.length === 0 && (
-            <p className="text-sm text-gray-400 py-6 px-2">No patients in this category.</p>
+            <p className="text-sm text-text-muted py-6 px-2">No patients in this category.</p>
           )}
         </div>
       )}

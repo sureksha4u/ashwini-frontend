@@ -39,7 +39,7 @@ export function AnalyticsTab({ patientId }: AnalyticsTabProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center gap-2 py-8 text-gray-400 text-sm">
+      <div className="flex items-center gap-2 py-8 text-text-muted text-sm">
         <Loader2 className="w-4 h-4 animate-spin" />
         Loading analytics...
       </div>
@@ -67,50 +67,50 @@ export function AnalyticsTab({ patientId }: AnalyticsTabProps) {
       {/* Adherence cards */}
       <div className="grid grid-cols-2 gap-4">
         {/* X-Ray Adherence */}
-        <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-5">
+        <div className="bg-surface-1 border border-border-subtle rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <ScanLine className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">X-Ray Adherence</span>
+              <ScanLine className="w-4 h-4 text-accent" />
+              <span className="text-sm font-medium text-text-primary">X-Ray Adherence</span>
             </div>
-            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <span className="text-lg font-bold text-text-primary">
               {xrayPct.toFixed(0)}%
             </span>
           </div>
-          <ProgressBar value={xrayPct} color="bg-primary" />
-          <p className="text-xs text-gray-400 mt-2">
+          <ProgressBar value={xrayPct} color="bg-accent" />
+          <p className="text-xs text-text-muted mt-2">
             {data.xray_adherence.completed} of {data.xray_adherence.ordered} X-rays completed
           </p>
         </div>
 
         {/* Pharmacy Refills */}
-        <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-5">
+        <div className="bg-surface-1 border border-border-subtle rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Pill className="w-4 h-4 text-green-500" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Prescription Adherence</span>
+              <span className="text-sm font-medium text-text-primary">Prescription Adherence</span>
             </div>
-            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            <span className="text-lg font-bold text-text-primary">
               {refillPct.toFixed(0)}%
             </span>
           </div>
           <ProgressBar value={refillPct} color="bg-green-500" />
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-text-muted mt-2">
             {data.pharmacy_refills.refill_due} refill(s) due
           </p>
         </div>
       </div>
 
       {/* Risk Assessment */}
-      <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-5">
+      <div className="bg-surface-1 border border-border-subtle rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Risk Assessment</h3>
-            <p className="text-xs text-gray-400 mt-0.5">
+            <h3 className="text-sm font-semibold text-text-primary">Risk Assessment</h3>
+            <p className="text-xs text-text-muted mt-0.5">
               Visit frequency: {data.risk_assessment.visit_frequency}
             </p>
           </div>
-          <span className={`text-sm font-semibold capitalize ${riskColors[riskLevel] ?? "text-gray-600"}`}>
+          <span className={`text-sm font-semibold capitalize ${riskColors[riskLevel] ?? "text-text-secondary"}`}>
             {riskLevel} Risk
           </span>
         </div>
@@ -118,7 +118,7 @@ export function AnalyticsTab({ patientId }: AnalyticsTabProps) {
         {riskFactors.length > 0 ? (
           <ul className="space-y-2">
             {riskFactors.map((factor, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
                 {i === 0 ? (
                   <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
                 ) : (
@@ -129,23 +129,23 @@ export function AnalyticsTab({ patientId }: AnalyticsTabProps) {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-gray-400">No significant risk factors identified.</p>
+          <p className="text-sm text-text-muted">No significant risk factors identified.</p>
         )}
       </div>
 
       {/* Compliance breakdown */}
-      <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-5">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">Compliance Overview</h3>
+      <div className="bg-surface-1 border border-border-subtle rounded-xl p-5">
+        <h3 className="text-sm font-semibold text-text-primary mb-4">Compliance Overview</h3>
         <div className="space-y-3">
           <div>
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <div className="flex justify-between text-xs text-text-secondary mb-1">
               <span>Appointment Show Rate</span>
               <span>{data.compliance.appointment_show_rate}%</span>
             </div>
-            <ProgressBar value={data.compliance.appointment_show_rate} color="bg-primary" />
+            <ProgressBar value={data.compliance.appointment_show_rate} color="bg-accent" />
           </div>
           <div>
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <div className="flex justify-between text-xs text-text-secondary mb-1">
               <span>Follow-up Completion</span>
               <span>{data.compliance.follow_up_completion}%</span>
             </div>

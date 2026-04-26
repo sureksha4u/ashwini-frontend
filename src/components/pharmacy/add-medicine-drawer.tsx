@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { X, Upload, Package } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Medicine } from "@/lib/types/inventory";
+import { Btn } from "@/components/ui/Btn";
+import { cn } from "@/lib/utils";
 
 interface AddMedicineDrawerProps {
   open: boolean;
@@ -13,166 +15,139 @@ interface AddMedicineDrawerProps {
 
 export function AddMedicineDrawer({ open, onClose, medicine }: AddMedicineDrawerProps) {
   const [dragActive, setDragActive] = useState(false);
-  
-  // In a real app, we'd use these to populate a form
   const isEditing = !!medicine;
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
+    if (e.type === "dragenter" || e.type === "dragover") setDragActive(true);
+    else if (e.type === "dragleave") setDragActive(false);
   };
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop with glassmorphism */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-[#0F172A]/20 backdrop-blur-sm z-40"
+            className="fixed inset-0 z-40"
+            style={{ background: "rgba(15, 23, 42, 0.45)", backdropFilter: "blur(4px)" }}
             onClick={onClose}
           />
 
-          {/* Side Drawer */}
           <motion.div
-            initial={{ x: '100%' }}
+            initial={{ x: "100%" }}
             animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-[600px] bg-white shadow-2xl z-50 overflow-y-auto"
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            className="fixed right-0 top-0 bottom-0 w-[600px] bg-surface-1 shadow-modal z-50 overflow-y-auto border-l border-border-subtle"
           >
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b border-[#E2E8F0] px-8 py-6 flex items-center justify-between">
+            <div className="sticky top-0 bg-surface-1 border-b border-border-subtle px-6 py-5 flex items-center justify-between z-10">
               <div>
-                <h2 className="text-xl font-semibold text-[#0F172A] tracking-tight">
-                  {isEditing ? 'Edit Medicine' : 'Add New Medicine'}
+                <h2 className="text-lg font-semibold text-text-primary tracking-tight">
+                  {isEditing ? "Edit Medicine" : "Add New Medicine"}
                 </h2>
-                <p className="text-sm text-[#64748B] mt-1">
-                  {isEditing ? 'Update medicine details in inventory' : 'Enter medicine details to add to inventory'}
+                <p className="text-xs text-text-secondary mt-0.5">
+                  {isEditing
+                    ? "Update medicine details in inventory"
+                    : "Enter medicine details to add to inventory"}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] flex items-center justify-center transition-colors"
+                className="w-9 h-9 rounded-lg bg-surface-2 hover:bg-surface-3 border border-border-subtle flex items-center justify-center transition-colors"
               >
-                <X className="w-5 h-5 text-[#64748B]" strokeWidth={1.25} />
+                <X className="w-4 h-4 text-text-secondary" strokeWidth={1.5} />
               </button>
             </div>
 
-            {/* Form Content */}
-            <div className="px-8 py-6 space-y-8">
-              {/* Basic Information Section */}
-              <section>
-                <h3 className="text-sm font-semibold text-[#0F172A] mb-4 tracking-wide uppercase">
-                  Basic Information
-                </h3>
-                <div className="space-y-4">
-                  <FloatingInput label="Medicine Name" required defaultValue={medicine?.name} />
-                  <FloatingInput label="Generic Name" defaultValue={medicine?.generic_name || ''} />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FloatingInput label="Category" defaultValue={medicine?.category || ''} />
-                    <FloatingInput label="Manufacturer" defaultValue={medicine?.manufacturer || ''} />
-                  </div>
+            <div className="px-6 py-5 space-y-7">
+              <Section title="Basic Information">
+                <FloatingInput label="Medicine Name" required defaultValue={medicine?.name} />
+                <FloatingInput label="Generic Name" defaultValue={medicine?.generic_name || ""} />
+                <div className="grid grid-cols-2 gap-3">
+                  <FloatingInput label="Category" defaultValue={medicine?.category || ""} />
+                  <FloatingInput label="Manufacturer" defaultValue={medicine?.manufacturer || ""} />
                 </div>
-              </section>
+              </Section>
 
-              {/* Pricing Section */}
-              <section>
-                <h3 className="text-sm font-semibold text-[#0F172A] mb-4 tracking-wide uppercase">
-                  Pricing & Stock
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FloatingInput 
-                      label="Purchase Price (₹)" 
-                      type="number" 
-                      defaultValue={medicine?.batches[0]?.purchase_price?.toString()} 
-                    />
-                    <FloatingInput 
-                      label="MRP (₹)" 
-                      type="number" 
-                      required 
-                      defaultValue={medicine?.batches[0]?.mrp?.toString()} 
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FloatingInput 
-                      label="Stock Quantity" 
-                      type="number" 
-                      required 
-                      defaultValue={medicine?.total_stock?.toString()} 
-                    />
-                    <FloatingInput 
-                      label="Reorder Level" 
-                      type="number" 
-                      defaultValue={medicine?.reorder_level?.toString()} 
-                    />
-                  </div>
-                  <FloatingInput 
-                    label="Rack Location" 
-                    placeholder="e.g., A-12" 
-                    defaultValue={medicine?.location || ''} 
+              <Section title="Pricing & Stock">
+                <div className="grid grid-cols-2 gap-3">
+                  <FloatingInput
+                    label="Purchase Price (₹)"
+                    type="number"
+                    defaultValue={medicine?.batches[0]?.purchase_price?.toString()}
+                  />
+                  <FloatingInput
+                    label="MRP (₹)"
+                    type="number"
+                    required
+                    defaultValue={medicine?.batches[0]?.mrp?.toString()}
                   />
                 </div>
-              </section>
-
-              {/* Expiry & Batch Section */}
-              <section>
-                <h3 className="text-sm font-semibold text-[#0F172A] mb-4 tracking-wide uppercase">
-                  Expiry & Batch Details
-                </h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FloatingInput 
-                      label="Batch Number" 
-                      required 
-                      defaultValue={medicine?.batches[0]?.batch_number} 
-                    />
-                    <FloatingInput 
-                      label="Expiry Date" 
-                      type="date" 
-                      required 
-                      defaultValue={medicine?.batches[0]?.expiry_date ? new Date(medicine.batches[0].expiry_date).toISOString().split('T')[0] : ''} 
-                    />
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <FloatingInput
+                    label="Stock Quantity"
+                    type="number"
+                    required
+                    defaultValue={medicine?.total_stock?.toString()}
+                  />
+                  <FloatingInput
+                    label="Reorder Level"
+                    type="number"
+                    defaultValue={medicine?.reorder_level?.toString()}
+                  />
                 </div>
-              </section>
+                <FloatingInput
+                  label="Rack Location"
+                  placeholder="e.g., A-12"
+                  defaultValue={medicine?.location || ""}
+                />
+              </Section>
 
-              {/* Image Upload Section */}
-              <section>
-                <h3 className="text-sm font-semibold text-[#0F172A] mb-4 tracking-wide uppercase">
-                  Product Image
-                </h3>
+              <Section title="Expiry & Batch Details">
+                <div className="grid grid-cols-2 gap-3">
+                  <FloatingInput
+                    label="Batch Number"
+                    required
+                    defaultValue={medicine?.batches[0]?.batch_number}
+                  />
+                  <FloatingInput
+                    label="Expiry Date"
+                    type="date"
+                    required
+                    defaultValue={
+                      medicine?.batches[0]?.expiry_date
+                        ? new Date(medicine.batches[0].expiry_date).toISOString().split("T")[0]
+                        : ""
+                    }
+                  />
+                </div>
+              </Section>
+
+              <Section title="Product Image">
                 <div
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
-                  className={`
-                    relative border-2 border-dashed rounded-xl p-8 transition-all duration-200
-                    ${dragActive 
-                      ? 'border-[#2563EB] bg-blue-50' 
-                      : 'border-[#E2E8F0] bg-[#F8FAFC] hover:border-[#CBD5E1]'
-                    }
-                  `}
+                  className={cn(
+                    "relative border-2 border-dashed rounded-xl p-7 transition-colors",
+                    dragActive
+                      ? "border-accent bg-accent-soft"
+                      : "border-border-subtle bg-surface-2 hover:border-border-strong",
+                  )}
                 >
                   <div className="flex flex-col items-center justify-center text-center">
-                    <div className="w-14 h-14 rounded-full bg-white border border-[#E2E8F0] flex items-center justify-center mb-3 shadow-sm">
-                      <Upload className="w-6 h-6 text-[#64748B]" strokeWidth={1.25} />
+                    <div className="w-12 h-12 rounded-full bg-surface-1 border border-border-subtle flex items-center justify-center mb-2.5 shadow-soft">
+                      <Upload className="w-5 h-5 text-text-secondary" strokeWidth={1.5} />
                     </div>
-                    <p className="text-sm font-medium text-[#0F172A] mb-1">
+                    <p className="text-sm font-semibold text-text-primary mb-0.5">
                       Drag & drop or click to upload
                     </p>
-                    <p className="text-xs text-[#64748B]">
-                      PNG, JPG up to 5MB
-                    </p>
+                    <p className="text-xs text-text-muted">PNG, JPG up to 5MB</p>
                   </div>
                   <input
                     type="file"
@@ -180,30 +155,32 @@ export function AddMedicineDrawer({ open, onClose, medicine }: AddMedicineDrawer
                     accept="image/png,image/jpeg"
                   />
                 </div>
-              </section>
+              </Section>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-[#E2E8F0]">
-                <button
-                  onClick={onClose}
-                  className="flex-1 px-6 py-3 rounded-lg border border-[#E2E8F0] text-[#0F172A] font-medium hover:bg-[#F8FAFC] transition-colors"
-                >
+              <div className="flex gap-3 pt-4 border-t border-border-subtle">
+                <Btn variant="secondary" size="lg" full onClick={onClose}>
                   Cancel
-                </button>
-                <button
-                  className="flex-1 px-6 py-3 rounded-lg bg-[#2563EB] text-white font-medium hover:bg-[#1D4ED8] shadow-lg shadow-blue-500/20 transition-all"
-                >
-                  <span className="flex items-center justify-center gap-2">
-                    <Package className="w-4 h-4" strokeWidth={1.25} />
-                    {isEditing ? 'Update Medicine' : 'Add Medicine'}
-                  </span>
-                </button>
+                </Btn>
+                <Btn variant="primary" size="lg" full icon={<Package className="w-4 h-4" />}>
+                  {isEditing ? "Update Medicine" : "Add Medicine"}
+                </Btn>
               </div>
             </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <h3 className="text-[11px] font-semibold text-text-secondary mb-3 tracking-wider uppercase">
+        {title}
+      </h3>
+      <div className="space-y-3">{children}</div>
+    </section>
   );
 }
 
@@ -215,15 +192,21 @@ interface FloatingInputProps {
   defaultValue?: string;
 }
 
-function FloatingInput({ label, type = "text", required = false, placeholder, defaultValue }: FloatingInputProps) {
+function FloatingInput({
+  label,
+  type = "text",
+  required = false,
+  placeholder,
+  defaultValue,
+}: FloatingInputProps) {
   const [focused, setFocused] = useState(false);
-  const [value, setValue] = useState(defaultValue || '');
+  const [value, setValue] = useState(defaultValue || "");
 
   useEffect(() => {
-    setValue(defaultValue || '');
+    setValue(defaultValue || "");
   }, [defaultValue]);
 
-  const hasValue = value !== '';
+  const hasValue = value !== "";
 
   return (
     <div className="relative">
@@ -235,26 +218,23 @@ function FloatingInput({ label, type = "text", required = false, placeholder, de
         onChange={(e) => setValue(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className={`
-          w-full px-4 py-3.5 rounded-lg border bg-white transition-all duration-200
-          text-[#0F172A] placeholder:text-transparent
-          ${focused || hasValue 
-            ? 'border-[#2563EB] ring-4 ring-blue-50' 
-            : 'border-[#E2E8F0] hover:border-[#CBD5E1]'
-          }
-        `}
+        className={cn(
+          "w-full px-3.5 py-3 rounded-lg border bg-surface-1 transition-all text-text-primary placeholder:text-transparent",
+          focused || hasValue
+            ? "border-accent ring-2 ring-accent/15"
+            : "border-border-subtle hover:border-border-strong",
+        )}
       />
       <label
-        className={`
-          absolute left-4 transition-all duration-200 pointer-events-none
-          ${focused || hasValue
-            ? 'top-2 text-xs text-[#2563EB] font-medium'
-            : 'top-1/2 -translate-y-1/2 text-sm text-[#64748B]'
-          }
-        `}
+        className={cn(
+          "absolute left-3.5 transition-all pointer-events-none",
+          focused || hasValue
+            ? "top-1.5 text-[10px] text-accent font-semibold uppercase tracking-wider"
+            : "top-1/2 -translate-y-1/2 text-sm text-text-muted",
+        )}
       >
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-danger ml-0.5">*</span>}
       </label>
     </div>
   );

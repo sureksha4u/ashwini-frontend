@@ -19,9 +19,9 @@ interface ConditionPanelProps {
 
 function ConditionPanel({ partId, conditions, selected, onSelect }: ConditionPanelProps) {
   return (
-    <div className="flex items-center gap-3 bg-gray-50 dark:bg-navy-dark border border-gray-200 dark:border-border-dark rounded-xl p-3">
+    <div className="flex items-center gap-3 bg-surface-2 border border-border-subtle rounded-xl p-3">
       <div className="flex-1">
-        <p className="text-[10px] text-gray-400 uppercase tracking-wide font-medium mb-2">
+        <p className="text-[10px] text-text-muted uppercase tracking-wide font-medium mb-2">
           {partId} — mark condition
         </p>
         <div className="flex flex-wrap gap-1.5">
@@ -179,7 +179,7 @@ export function AnnotationCanvas({ specialty, initialState, isEditable, isEnlarg
 
   if (!template) {
     return (
-      <div className="flex flex-col items-center justify-center py-8 text-center text-gray-400">
+      <div className="flex flex-col items-center justify-center py-8 text-center text-text-muted">
         <p className="text-xs">No diagram available for this specialty</p>
       </div>
     );
@@ -191,7 +191,7 @@ export function AnnotationCanvas({ specialty, initialState, isEditable, isEnlarg
     <div className="flex flex-col gap-2">
       {/* Header row: template label + drawing toolbar */}
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{template.label}</span>
+        <span className="text-xs font-semibold text-text-primary">{template.label}</span>
         {isEditable ? (
           <AnnotationToolbar
             activeTool={activeTool}
@@ -200,14 +200,14 @@ export function AnnotationCanvas({ specialty, initialState, isEditable, isEnlarg
             isEditable={isEditable}
           />
         ) : (
-          <span className="text-[10px] text-gray-400">Start a consultation to annotate</span>
+          <span className="text-[10px] text-text-muted">Start a consultation to annotate</span>
         )}
       </div>
 
       {/* Canvas container — no overflow-hidden so drawing layer isn't clipped */}
       <div
         ref={containerRef}
-        className="relative bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl"
+        className="relative bg-surface-1 border border-border-subtle rounded-xl"
         style={{ minHeight: 340 }}
       >
         {/* Base diagram */}
@@ -252,7 +252,7 @@ export function AnnotationCanvas({ specialty, initialState, isEditable, isEnlarg
         disabled={!isEditable}
         placeholder="Add annotation notes (e.g. patient-reported symptoms, clinical observations)..."
         rows={2}
-        className="w-full text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-lg px-3 py-2 outline-none resize-none placeholder-gray-400 dark:placeholder-gray-600 focus:ring-2 focus:ring-primary/30 disabled:opacity-60"
+        className="w-full text-xs text-text-primary bg-surface-1 border border-border-subtle rounded-lg px-3 py-2 outline-none resize-none placeholder:text-text-muted dark:placeholder-gray-600 focus:ring-2 focus:ring-accent/15 disabled:opacity-60"
       />
     </div>
   );

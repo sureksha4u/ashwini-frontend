@@ -1,189 +1,198 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  LayoutDashboard, Users, Pill, MessageSquare,
-  Settings, LogOut, Activity, ChevronRight, Menu, ChevronLeft
+  Home, Users, Pill, MessageSquare, Settings, LogOut,
+  ClipboardList, Box, Clock, AlertTriangle, User, Calendar,
+  Search, Activity, Beaker, BarChart, Scan, Receipt,
+  Building, ShieldCheck, Server, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getMe } from "@/lib/api/users";
 import type { UserResponse } from "@/lib/types";
 import type { UserRole } from "@/lib/types/role";
+import { Logo, Wordmark } from "@/components/ui/Logo";
+import { StatusDot } from "@/components/ui/StatusDot";
 
-// Each nav entry declares which roles can see it. ADMIN is implicitly allowed
-// everywhere (mirrors the backend RoleChecker auto-allow).
-type NavItem = {
-  name: string;
+type RoleKey =
+  | "doctor" | "pharmacist" | "receptionist" | "nurse"
+  | "lab" | "radiology" | "billing" | "admin" | "staff";
+
+interface NavEntry {
+  label: string;
   href: string;
-  icon: typeof LayoutDashboard;
-  roles: UserRole[];
-  count?: number;
+  icon: LucideIcon;
+  badge?: number;
+}
+
+const NAV_BY_ROLE: Record<RoleKey, NavEntry[]> = {
+  doctor: [
+    { label: "Dashboard", href: "/dashboard", icon: Home },
+    { label: "Patients", href: "/patients", icon: Users },
+    { label: "Templates", href: "/templates", icon: ClipboardList },
+    { label: "Messages", href: "/messages", icon: MessageSquare, badge: 4 },
+  ],
+  pharmacist: [
+    { label: "Inventory", href: "/pharmacy", icon: Box },
+    { label: "Dispensing", href: "/pharmacy/dispensing", icon: Pill },
+    { label: "Expiring", href: "/pharmacy/expiring", icon: Clock },
+    { label: "Low Stock", href: "/pharmacy/low-stock", icon: AlertTriangle },
+    { label: "Messages", href: "/messages", icon: MessageSquare },
+  ],
+  receptionist: [
+    { label: "Dashboard", href: "/dashboard", icon: Home },
+    { label: "Register", href: "/reception/register", icon: User },
+    { label: "Queue", href: "/reception/queue", icon: ClipboardList },
+    { label: "Appointments", href: "/reception/appointments", icon: Calendar },
+    { label: "Lookup", href: "/reception/patient-lookup", icon: Search },
+  ],
+  nurse: [
+    { label: "Queue", href: "/nurse/queue", icon: ClipboardList },
+    { label: "Vitals", href: "/nurse/vitals", icon: Activity },
+    { label: "Messages", href: "/messages", icon: MessageSquare },
+  ],
+  lab: [
+    { label: "Orders", href: "/labs/orders", icon: Beaker },
+    { label: "Critical", href: "/labs/critical-alerts", icon: AlertTriangle, badge: 3 },
+    { label: "Reports", href: "/labs/reports", icon: BarChart },
+  ],
+  radiology: [
+    { label: "Queue", href: "/radiology/queue", icon: Scan },
+    { label: "Critical", href: "/radiology/critical", icon: AlertTriangle, badge: 1 },
+  ],
+  billing: [
+    { label: "Queue", href: "/billing/queue", icon: Receipt },
+    { label: "Reports", href: "/billing/reports", icon: BarChart },
+  ],
+  admin: [
+    { label: "Overview", href: "/admin", icon: Home },
+    { label: "Hospitals", href: "/admin/hospitals", icon: Building },
+    { label: "Staff", href: "/admin/staff", icon: Users },
+    { label: "Audit Log", href: "/admin/audit-log", icon: ShieldCheck },
+    { label: "System Health", href: "/admin/system-health", icon: Server },
+  ],
+  staff: [
+    { label: "Dashboard", href: "/dashboard", icon: Home },
+    { label: "Messages", href: "/messages", icon: MessageSquare },
+  ],
 };
 
-const navigation: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["DOCTOR", "NURSE", "PHARMACIST", "RECEPTIONIST", "STAFF"] },
-  { name: "Patients", href: "/patients", icon: Users, roles: ["DOCTOR", "NURSE", "RECEPTIONIST"] },
-  { name: "Pharmacy", href: "/pharmacy", icon: Pill, roles: ["PHARMACIST"] },
-  { name: "Messages", href: "/messages", icon: MessageSquare, count: 3, roles: ["DOCTOR", "NURSE", "PHARMACIST", "RECEPTIONIST", "STAFF"] },
-];
+function pickRole(user: UserResponse | null): RoleKey {
+  if (!user) return "doctor";
+  const u = user as unknown as { role?: UserRole; is_admin?: boolean };
+  if (u.is_admin || u.role === "ADMIN") return "admin";
+  const map: Record<UserRole, RoleKey> = {
+    ADMIN: "admin",
+    DOCTOR: "doctor",
+    PHARMACIST: "pharmacist",
+    NURSE: "nurse",
+    RECEPTIONIST: "receptionist",
+    STAFF: "staff",
+  };
+  return u.role ? map[u.role] : "doctor";
+}
 
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
   const [user, setUser] = useState<UserResponse | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    const saved = localStorage.getItem("sidebar_collapsed");
-    if (saved) setIsCollapsed(JSON.parse(saved));
-    
-    // Fetch user for RBAC
+    setMounted(true);
     getMe().then(setUser).catch(() => {});
   }, []);
 
-  const toggleSidebar = () => {
-    const newState = !isCollapsed;
-    setIsCollapsed(newState);
-    localStorage.setItem("sidebar_collapsed", JSON.stringify(newState));
-  };
+  if (!mounted) return null;
+  if (pathname === "/" || pathname === "/onboard") return null;
+
+  const role = pickRole(user);
+  const nav = NAV_BY_ROLE[role];
 
   const handleLogout = () => {
     localStorage.removeItem("ashwini_token");
-    // Clear cookie by setting expiry to past
     document.cookie = "ashwini_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
     router.push("/");
   };
 
-  if (!isMounted) return null;
-  if (pathname === "/" || pathname === "/onboard") return null;
-
   return (
-    <aside 
-      className={cn(
-        "bg-white border-r border-slate-100 flex flex-col shrink-0 h-screen sticky top-0 transition-all duration-300 ease-in-out z-50",
-        isCollapsed ? "w-20" : "w-72"
-      )}
+    <aside
+      className="w-[232px] flex-shrink-0 h-screen sticky top-0 z-50 glass border-r border-border-subtle flex flex-col gap-1 p-3.5"
+      style={{ background: "var(--sidebar-bg)" }}
     >
-      {/* Brand & Toggle */}
-      <div className={cn("p-6 flex items-center", isCollapsed ? "justify-center" : "justify-between")}>
-        {!isCollapsed && (
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push("/dashboard")}>
-            <div className="bg-[#0F172A] p-2 rounded-xl shadow-lg shadow-slate-200">
-              <Activity className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-lg font-bold text-[#0F172A] tracking-tight">
-              Ashwini<span className="text-[#2563EB]">HMS</span>
-            </h1>
+      <div className="flex items-center gap-2.5 px-2 pt-1.5 pb-3.5">
+        <Logo size={28} />
+        <Wordmark size={15} />
+      </div>
+
+      <div className="h-px bg-border-subtle -mx-3.5 mb-2" />
+
+      <div className="text-[10px] font-semibold text-text-muted uppercase tracking-[0.08em] px-2.5 pt-2 pb-1">
+        Workspace
+      </div>
+
+      {nav.map((item) => {
+        const Icon = item.icon;
+        const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        return (
+          <button
+            key={item.href}
+            onClick={() => router.push(item.href)}
+            className={cn(
+              "flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium transition-colors",
+              isActive
+                ? "bg-text-primary text-page font-semibold dark:bg-accent dark:text-page"
+                : "text-text-secondary hover:bg-surface-2 hover:text-text-primary",
+            )}
+          >
+            <Icon size={17} strokeWidth={1.6} />
+            <span className="flex-1 text-left">{item.label}</span>
+            {item.badge && (
+              <span
+                className={cn(
+                  "text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white",
+                  isActive ? "bg-white/20" : "bg-danger",
+                )}
+              >
+                {item.badge}
+              </span>
+            )}
+          </button>
+        );
+      })}
+
+      <div className="flex-1" />
+
+      <div className="h-px bg-border-subtle -mx-3.5 my-2" />
+
+      <button
+        onClick={() => router.push("/settings")}
+        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-text-secondary hover:bg-surface-2 hover:text-text-primary transition-colors"
+      >
+        <Settings size={17} strokeWidth={1.6} />
+        <span className="flex-1 text-left">Settings</span>
+      </button>
+
+      <div className="bg-surface-2 border border-border-subtle rounded-lg px-3 py-2.5 flex items-center gap-2 mt-1">
+        <StatusDot color="success" pulse />
+        <div className="flex-1 min-w-0">
+          <div className="text-[11px] font-semibold text-text-primary leading-tight">
+            Production Cluster
           </div>
-        )}
-        <button 
-          onClick={toggleSidebar}
-          className="p-2 rounded-xl hover:bg-slate-50 text-slate-400 hover:text-[#0F172A] transition-colors"
-        >
-          {isCollapsed ? <Menu className="w-6 h-6" /> : <ChevronLeft className="w-5 h-5" />}
-        </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 px-3 mt-4 space-y-1.5 overflow-x-hidden">
-        {navigation
-          .filter(item => {
-            // Until /users/me resolves, show every nav item — the page itself
-            // will RoleGuard. Once user is loaded, filter by role.
-            if (!user) return true;
-            const role = (user as unknown as { role?: UserRole }).role;
-            if ((user as unknown as { is_admin?: boolean }).is_admin || role === "ADMIN") return true;
-            return Boolean(role && item.roles.includes(role));
-          })
-          .map((item) => {
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <button
-              key={item.name}
-              onClick={() => router.push(item.href)}
-              className={cn(
-                "w-full flex items-center rounded-2xl transition-all duration-200 group relative",
-                isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-3",
-                isActive 
-                  ? "bg-[#0F172A] text-white shadow-xl shadow-slate-900/10" 
-                  : "text-slate-500 hover:bg-slate-50 hover:text-[#0F172A]"
-              )}
-            >
-              <item.icon className={cn("w-5 h-5 shrink-0", isActive ? "text-[#2563EB]" : "text-slate-400 group-hover:text-[#2563EB]")} strokeWidth={1.5} />
-              
-              {!isCollapsed && (
-                <>
-                  <span className="flex-1 text-sm font-bold text-left truncate">{item.name}</span>
-                  {item.count && (
-                    <span className={cn(
-                      "px-2 py-0.5 rounded-full text-[10px] font-bold",
-                      isActive ? "bg-[#2563EB] text-white" : "bg-blue-50 text-[#2563EB]"
-                    )}>
-                      {item.count}
-                    </span>
-                  )}
-                </>
-              )}
-
-              {/* Tooltip for collapsed mode */}
-              {isCollapsed && (
-                <div className="absolute left-full ml-4 px-3 py-2 bg-[#0F172A] text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] whitespace-nowrap shadow-xl">
-                  {item.name} {item.count ? `(${item.count})` : ''}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Bottom Actions */}
-      <div className="p-3 border-t border-slate-50 space-y-1.5">
-        <button
-          onClick={() => router.push("/settings")}
-          className={cn(
-            "w-full flex items-center rounded-2xl text-slate-500 hover:bg-slate-50 hover:text-[#0F172A] transition-all group relative",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-3"
-          )}
-        >
-          <Settings className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-[#2563EB]" strokeWidth={1.5} />
-          {!isCollapsed && <span className="text-sm font-bold">Settings</span>}
-          {isCollapsed && (
-            <div className="absolute left-full ml-4 px-3 py-2 bg-[#0F172A] text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] whitespace-nowrap">
-              Settings
-            </div>
-          )}
-        </button>
-        <button
-          onClick={handleLogout}
-          className={cn(
-            "w-full flex items-center rounded-2xl text-red-500 hover:bg-red-50 transition-all group relative",
-            isCollapsed ? "justify-center p-3" : "px-4 py-3 gap-3"
-          )}
-        >
-          <LogOut className="w-5 h-5 shrink-0 text-red-400 group-hover:text-red-600" strokeWidth={1.5} />
-          {!isCollapsed && <span className="text-sm font-bold truncate">Log Off Workspace</span>}
-          {isCollapsed && (
-            <div className="absolute left-full ml-4 px-3 py-2 bg-red-600 text-white text-xs font-bold rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-[60] whitespace-nowrap">
-              Log Off Workspace
-            </div>
-          )}
-        </button>
-      </div>
-
-      {/* Workspace Status */}
-      {!isCollapsed && (
-        <div className="p-6 bg-slate-50/50 m-4 rounded-2xl border border-slate-100/50">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-              Production Cluster Live
-            </p>
+          <div className="text-[10px] text-text-muted leading-tight mt-0.5">
+            asia-south1 · 12ms
           </div>
         </div>
-      )}
+      </div>
+
+      <button
+        onClick={handleLogout}
+        className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] font-medium text-text-secondary hover:bg-danger-soft hover:text-danger transition-colors mt-1"
+      >
+        <LogOut size={17} strokeWidth={1.6} />
+        <span className="flex-1 text-left">Sign out</span>
+      </button>
     </aside>
   );
 }

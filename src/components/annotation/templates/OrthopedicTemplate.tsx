@@ -326,11 +326,11 @@ export function OrthopedicTemplate({ selectedParts, onPartClick, isEditable, con
 
       {/* ── Gender dropdown ── */}
       <div className="flex items-center gap-2 self-start">
-        <span className="text-[10px] text-gray-400 uppercase tracking-wide font-medium">Body</span>
+        <span className="text-[10px] text-text-muted uppercase tracking-wide font-medium">Body</span>
         <select
           value={gender}
           onChange={e => setGender(e.target.value as "male" | "female")}
-          className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark text-gray-700 dark:text-gray-300 outline-none focus:ring-2 focus:ring-primary/30"
+          className="text-xs px-2.5 py-1 rounded-lg border border-border-subtle bg-surface-1 text-text-primary outline-none focus:ring-2 focus:ring-accent/15"
         >
           <option value="male">Male</option>
           <option value="female">Female</option>
@@ -340,12 +340,12 @@ export function OrthopedicTemplate({ selectedParts, onPartClick, isEditable, con
       {/* ── Muscles (Front + Back) ── */}
       <div className="w-full flex flex-col items-center gap-2">
         <div className="flex items-center gap-2 self-start">
-          <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Muscles</span>
-          <span className="text-[9px] text-gray-400">{gender === "female" ? "— female body" : "— male body"}</span>
+          <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wide">Muscles</span>
+          <span className="text-[9px] text-text-muted">{gender === "female" ? "— female body" : "— male body"}</span>
         </div>
         <div className="flex gap-4 justify-center w-full items-start">
           <div className="flex flex-col items-center gap-1">
-            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Front</span>
+            <span className="text-[10px] text-text-muted font-medium uppercase tracking-wide">Front</span>
             <Body
               data={buildHighlighted(true)}
               side="front"
@@ -356,7 +356,7 @@ export function OrthopedicTemplate({ selectedParts, onPartClick, isEditable, con
             />
           </div>
           <div className="flex flex-col items-center gap-1">
-            <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Back</span>
+            <span className="text-[10px] text-text-muted font-medium uppercase tracking-wide">Back</span>
             <Body
               data={buildHighlighted(false)}
               side="back"
@@ -372,8 +372,8 @@ export function OrthopedicTemplate({ selectedParts, onPartClick, isEditable, con
       {/* ── Bones (Front only) ── */}
       <div className="w-full flex flex-col items-center gap-2">
         <div className="flex items-center gap-2 self-start">
-          <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Bones</span>
-          <span className="text-[9px] text-gray-400">
+          <span className="text-[10px] font-semibold text-text-secondary uppercase tracking-wide">Bones</span>
+          <span className="text-[9px] text-text-muted">
             {gender === "female" ? "— wider pelvis" : "— skeletal view"}
           </span>
         </div>
@@ -389,7 +389,7 @@ export function OrthopedicTemplate({ selectedParts, onPartClick, isEditable, con
       {/* ── Condition legend ── */}
       <div className="flex flex-wrap gap-2 justify-center">
         {conditions.map(c => (
-          <span key={c.id} className="flex items-center gap-1 text-[10px] text-gray-500">
+          <span key={c.id} className="flex items-center gap-1 text-[10px] text-text-secondary">
             <span className="w-3 h-3 rounded-full inline-block" style={{ background: c.color }} />
             {c.label}
           </span>

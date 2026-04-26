@@ -24,7 +24,7 @@ function getPatientStatus(totalVisits: number, lastVisitDate: string | null) {
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
   if (lastVisit >= sixMonthsAgo) return { label: "Active Patient", bg: "bg-green-100 dark:bg-green-900/30", text: "text-green-700 dark:text-green-400" };
-  return { label: "Inactive", bg: "bg-gray-100 dark:bg-gray-800/40", text: "text-gray-600 dark:text-gray-400" };
+  return { label: "Inactive", bg: "bg-surface-2 dark:bg-gray-800/40", text: "text-text-secondary" };
 }
 
 export const OverviewTab = forwardRef<OverviewTabHandle, OverviewTabProps>(
@@ -111,7 +111,7 @@ export const OverviewTab = forwardRef<OverviewTabHandle, OverviewTabProps>(
 
     if (loading) {
       return (
-        <div className="flex items-center gap-2 py-8 text-gray-400 text-sm">
+        <div className="flex items-center gap-2 py-8 text-text-muted text-sm">
           <Loader2 className="w-4 h-4 animate-spin" />
           Loading overview...
         </div>
@@ -133,74 +133,74 @@ export const OverviewTab = forwardRef<OverviewTabHandle, OverviewTabProps>(
       <div className="flex flex-col gap-4">
         {/* Vitals */}
         <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4">
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-3">
             Vitals
           </h3>
           {isEditable ? (
             <div className="grid grid-cols-4 gap-3">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Blood Pressure</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Blood Pressure</p>
                 <input
                   type="text"
                   value={bpInput}
                   onChange={(e) => { setBpInput(e.target.value); notifyChange({ blood_pressure: e.target.value }); }}
                   placeholder="e.g. 120/80"
-                  className="w-full text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white/60 dark:bg-navy-dark/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-sm font-semibold text-text-primary bg-surface-1/60 dark:bg-surface-2/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-[10px] text-gray-400 mt-0.5">mmHg</p>
+                <p className="text-[10px] text-text-muted mt-0.5">mmHg</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Pulse Rate</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Pulse Rate</p>
                 <input
                   type="number"
                   value={pulseInput}
                   onChange={(e) => { setPulseInput(e.target.value); notifyChange({ pulse_bpm: e.target.value ? parseInt(e.target.value) : undefined }); }}
                   placeholder="e.g. 72"
-                  className="w-full text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white/60 dark:bg-navy-dark/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-sm font-semibold text-text-primary bg-surface-1/60 dark:bg-surface-2/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-[10px] text-gray-400 mt-0.5">bpm</p>
+                <p className="text-[10px] text-text-muted mt-0.5">bpm</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">Temperature</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">Temperature</p>
                 <input
                   type="number"
                   step="0.1"
                   value={tempInput}
                   onChange={(e) => { setTempInput(e.target.value); notifyChange({ temperature_c: e.target.value ? parseFloat(e.target.value) : undefined }); }}
                   placeholder="e.g. 98.6"
-                  className="w-full text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white/60 dark:bg-navy-dark/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-sm font-semibold text-text-primary bg-surface-1/60 dark:bg-surface-2/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-[10px] text-gray-400 mt-0.5">°F</p>
+                <p className="text-[10px] text-text-muted mt-0.5">°F</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">SpO2</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide mb-1">SpO2</p>
                 <input
                   type="number"
                   value={spo2Input}
                   onChange={(e) => { setSpo2Input(e.target.value); notifyChange({ spo2_percent: e.target.value ? parseFloat(e.target.value) : undefined }); }}
                   placeholder="e.g. 98"
-                  className="w-full text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white/60 dark:bg-navy-dark/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-sm font-semibold text-text-primary bg-surface-1/60 dark:bg-surface-2/60 border border-blue-200 dark:border-blue-800 rounded-md px-2 py-1 outline-none focus:ring-1 focus:ring-primary"
                 />
-                <p className="text-[10px] text-gray-400 mt-0.5">%</p>
+                <p className="text-[10px] text-text-muted mt-0.5">%</p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-4 gap-3">
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Blood Pressure</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{bp}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide">Blood Pressure</p>
+                <p className="text-sm font-semibold text-text-primary">{bp}</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Pulse Rate</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pulse}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide">Pulse Rate</p>
+                <p className="text-sm font-semibold text-text-primary">{pulse}</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide">Temperature</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{temp}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide">Temperature</p>
+                <p className="text-sm font-semibold text-text-primary">{temp}</p>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase tracking-wide">SpO2</p>
-                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{spo2}</p>
+                <p className="text-[10px] text-text-muted uppercase tracking-wide">SpO2</p>
+                <p className="text-sm font-semibold text-text-primary">{spo2}</p>
               </div>
             </div>
           )}
@@ -208,7 +208,7 @@ export const OverviewTab = forwardRef<OverviewTabHandle, OverviewTabProps>(
             <button
               onClick={handleSave}
               disabled={saving}
-              className="mt-3 self-end text-xs text-primary hover:underline disabled:opacity-50 float-right"
+              className="mt-3 self-end text-xs text-accent hover:underline disabled:opacity-50 float-right"
             >
               {saving ? "Saving..." : "Save"}
             </button>
@@ -216,30 +216,30 @@ export const OverviewTab = forwardRef<OverviewTabHandle, OverviewTabProps>(
         </div>
 
         {/* Patient Summary */}
-        <div className="bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-xl p-4">
-          <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">
+        <div className="bg-surface-1 border border-border-subtle rounded-xl p-4">
+          <h3 className="text-xs font-semibold text-text-secondary uppercase tracking-wide mb-3">
             Patient Summary
           </h3>
           <div className="flex items-center gap-10">
             <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Total Visits</p>
-              <p className="text-xl font-bold text-gray-900 dark:text-gray-100">{data.total_visits}</p>
+              <p className="text-[10px] text-text-muted uppercase tracking-wide">Total Visits</p>
+              <p className="text-xl font-bold text-text-primary">{data.total_visits}</p>
             </div>
             <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Last Visit</p>
-              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+              <p className="text-[10px] text-text-muted uppercase tracking-wide">Last Visit</p>
+              <p className="text-sm font-semibold text-text-primary">
                 {data.last_visit_date ? new Date(data.last_visit_date).toLocaleDateString() : "—"}
               </p>
             </div>
             <div>
-              <p className="text-[10px] text-gray-400 uppercase tracking-wide">Status</p>
+              <p className="text-[10px] text-text-muted uppercase tracking-wide">Status</p>
               <span className={`inline-block mt-1 px-2 py-0.5 ${status.bg} ${status.text} text-xs font-medium rounded-full`}>
                 {status.label}
               </span>
             </div>
           </div>
           {data.patient_summary && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">{data.patient_summary}</p>
+            <p className="text-xs text-text-secondary mt-3">{data.patient_summary}</p>
           )}
         </div>
 

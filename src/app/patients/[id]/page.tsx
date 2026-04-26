@@ -88,7 +88,7 @@ export default function PatientConsultationPage() {
   if (loading) {
     return (
       <div className="flex flex-col h-screen overflow-hidden">
-        <div className="flex-1 flex items-center justify-center text-gray-400 gap-2">
+        <div className="flex-1 flex items-center justify-center text-text-muted gap-2">
           <Loader2 className="w-5 h-5 animate-spin" />
           Loading patient...
         </div>
@@ -99,7 +99,7 @@ export default function PatientConsultationPage() {
   if (error || !patient) {
     return (
       <div className="flex flex-col h-screen overflow-hidden">
-        <div className="flex-1 flex items-center justify-center text-red-500 text-sm">
+        <div className="flex-1 flex items-center justify-center text-danger text-sm">
           {typeof error === 'string' ? error : (error as any)?.message ?? "Patient not found"}
         </div>
       </div>
