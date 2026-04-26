@@ -1,15 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { ScanLine, Pill, History, BarChart2, LayoutDashboard } from "lucide-react";
+import { ScanLine, Pill, History, BarChart2, LayoutDashboard, Beaker } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { OverviewTab, type OverviewTabHandle } from "./tabs/OverviewTab";
 import { PrescriptionTab, type PrescriptionTabHandle } from "./tabs/PrescriptionTab";
 import { RadiologyTab } from "./tabs/RadiologyTab";
 import { HistoryTab } from "./tabs/HistoryTab";
 import { AnalyticsTab } from "./tabs/AnalyticsTab";
+import { LabsTab } from "./tabs/LabsTab";
 
-type TabId = "overview" | "radiology" | "prescription" | "history" | "analytics";
+type TabId = "overview" | "radiology" | "labs" | "prescription" | "history" | "analytics";
 
 interface Tab {
   id: TabId;
@@ -20,8 +21,9 @@ interface Tab {
 
 const TABS: Tab[] = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard className="w-3.5 h-3.5" /> },
-  { id: "radiology", label: "X-Ray", icon: <ScanLine className="w-3.5 h-3.5" /> },
   { id: "prescription", label: "Prescription", icon: <Pill className="w-3.5 h-3.5" /> },
+  { id: "labs", label: "Labs", icon: <Beaker className="w-3.5 h-3.5" /> },
+  { id: "radiology", label: "X-Ray", icon: <ScanLine className="w-3.5 h-3.5" /> },
   { id: "history", label: "History", icon: <History className="w-3.5 h-3.5" /> },
   { id: "analytics", label: "Analysis", icon: <BarChart2 className="w-3.5 h-3.5" /> },
 ];
@@ -97,6 +99,7 @@ export function PatientTabs({
             doctorSpecialty={doctorSpecialty}
           />
         </div>
+        {activeTab === "labs" && <LabsTab patientId={patientId} />}
         {activeTab === "radiology" && (
           <RadiologyTab patientId={patientId} isEditable={isConsultationActive} />
         )}
