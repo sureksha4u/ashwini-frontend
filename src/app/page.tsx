@@ -2,16 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from "lucide-react";
+import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2, Eye, EyeOff } from "lucide-react";
 import type { Token } from "@/lib/types";
-import { Logo, Wordmark } from "@/components/ui/Logo";
-import { Btn } from "@/components/ui/Btn";
-import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,26 +18,18 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-
     try {
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/api/v1/login/token`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData,
-        },
+        { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: formData }
       );
-
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.detail || "Invalid credentials");
       }
-
       const data: Token = await res.json();
       localStorage.setItem("ashwini_token", data.access_token);
       document.cookie = `ashwini_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
@@ -51,38 +42,25 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-page text-text-primary flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Soft accent backdrop — adds depth without distraction */}
-      <div
-        className="absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(800px 480px at 20% 0%, var(--accent-soft), transparent 60%), radial-gradient(700px 420px at 80% 100%, var(--info-soft), transparent 60%)",
-        }}
-      />
-
-      <div className="absolute top-6 right-6">
-        <ThemeToggle />
-      </div>
-
-      <div className="flex items-center gap-3 mb-8">
-        <Logo size={36} />
-        <div>
-          <Wordmark size={22} />
-          <p className="text-[10px] uppercase tracking-[0.2em] font-semibold text-text-muted mt-1">
-            Clinical Excellence
-          </p>
-        </div>
-      </div>
-
-      <div className="w-full max-w-md bg-surface-1 rounded-2xl shadow-soft border border-border-subtle overflow-hidden">
-        <div className="p-8">
-          <div className="mb-7">
-            <h2 className="text-xl font-semibold text-text-primary tracking-tight">Secure Access</h2>
-            <p className="text-text-secondary text-sm mt-1">
-              Enter your professional credentials to continue.
-            </p>
+    <div className="w-screen h-screen flex overflow-hidden bg-page text-text-primary font-sans">
+      {/* Form panel */}
+      <div className="flex-1 flex items-center justify-center px-16 relative">
+        <div className="w-[420px]">
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-7">
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M3 12h4l2-7 4 14 2-7h6"/>
+              </svg>
+            </div>
+            <div className="flex items-baseline gap-1.5 text-[18px] font-semibold">
+              <span>Ashwini</span>
+              <span className="text-text-muted font-medium">HMS</span>
+            </div>
           </div>
+
+          <h1 className="text-[28px] font-semibold tracking-tight mb-1">Welcome back</h1>
+          <p className="text-[14px] text-text-secondary mb-7">Sign in to your hospital workspace.</p>
 
           {error && (
             <div className="mb-5 p-3 bg-danger-soft border border-danger/20 rounded-lg flex items-start gap-2.5 text-danger text-sm">
@@ -91,101 +69,123 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="space-y-4">
-            <FormField
-              label="Professional Email"
-              icon={<Mail size={14} />}
-              type="email"
-              required
-              value={email}
-              onChange={setEmail}
-              placeholder="doctor@ashwini.hms"
-            />
-            <FormField
-              label="Password"
-              icon={<Lock size={14} />}
-              type="password"
-              required
-              value={password}
-              onChange={setPassword}
-              placeholder="••••••••"
-            />
-
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer">
+          <form onSubmit={handleLogin} className="flex flex-col gap-3.5">
+            <div>
+              <label className="text-[12px] font-semibold text-text-primary mb-1.5 block">Work email</label>
+              <div className="relative">
+                <Mail size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-border-strong text-accent focus:ring-accent"
+                  type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                  className="w-full h-[42px] pl-10 pr-4 bg-surface-1 border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/15 focus:border-accent transition-all"
+                  placeholder="you@hospital.health"
                 />
-                <span className="text-xs text-text-secondary">Remember me</span>
-              </label>
-              <button type="button" className="text-xs font-semibold text-accent hover:text-accent-hover">
-                Forgot password?
-              </button>
+              </div>
             </div>
 
-            <Btn type="submit" full size="lg" disabled={isLoading} className="mt-2">
-              {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <>
-                  Sign In to Workspace
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </Btn>
+            <div>
+              <div className="flex items-baseline justify-between mb-1.5">
+                <label className="text-[12px] font-semibold text-text-primary">Password</label>
+                <button type="button" onClick={() => router.push("/forgot-password")} className="text-[11px] font-medium text-accent">Forgot password?</button>
+              </div>
+              <div className="relative">
+                <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" />
+                <input
+                  type={showPassword ? "text" : "password"} required value={password} onChange={e => setPassword(e.target.value)}
+                  className="w-full h-[42px] pl-10 pr-10 bg-surface-1 border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/15 focus:border-accent transition-all"
+                  placeholder="••••••••••••"
+                />
+                <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary">
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+
+            <label className="flex items-center gap-2 text-[13px] text-text-secondary mt-1 cursor-pointer">
+              <span
+                onClick={() => setRemember(r => !r)}
+                className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border transition-colors ${remember ? "bg-accent border-accent" : "border-border-strong bg-surface-1"}`}
+              >
+                {remember && <svg width="10" height="10" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </span>
+              Remember this device for 30 days
+            </label>
+
+            <button
+              type="submit" disabled={isLoading}
+              className="mt-2 h-[44px] w-full rounded-lg bg-accent text-white text-[13px] font-semibold flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors disabled:opacity-60"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Sign in to Ashwini HMS <ArrowRight size={15} /></>}
+            </button>
+
+            <div className="flex items-center gap-2.5 my-1 text-text-muted text-[11px] font-semibold uppercase tracking-widest">
+              <div className="flex-1 h-px bg-border-subtle" /> or <div className="flex-1 h-px bg-border-subtle" />
+            </div>
+
+            <button
+              type="button"
+              className="h-[42px] w-full rounded-lg bg-surface-1 border border-border-subtle text-[13px] font-semibold text-text-secondary flex items-center justify-center gap-2 hover:bg-surface-2 transition-colors"
+            >
+              <ShieldCheck size={15} className="text-accent" /> Continue with hospital SSO
+            </button>
           </form>
-        </div>
 
-        <div className="bg-surface-2 px-6 py-4 border-t border-border-subtle flex items-center justify-center gap-2">
-          <p className="text-xs text-text-secondary font-medium">Have an invitation code?</p>
-          <button
-            onClick={() => router.push("/onboard")}
-            className="text-xs font-semibold text-accent hover:underline underline-offset-4"
-          >
-            Activate Account
-          </button>
+          <p className="text-center text-[12px] text-text-secondary mt-6">
+            New hospital?{" "}
+            <span className="text-accent font-semibold cursor-pointer">Talk to onboarding →</span>
+          </p>
+        </div>
+        <div className="absolute bottom-6 left-0 right-0 text-center text-[11px] text-text-muted">
+          © 2026 Ashwini HMS · v4.2.1 · HIPAA-aware · ISO 27001
         </div>
       </div>
 
-      <div className="mt-10 flex items-center gap-2 text-text-muted">
-        <ShieldCheck size={14} />
-        <span className="text-[11px] font-semibold uppercase tracking-widest">
-          End-to-End Encrypted Workspace
-        </span>
-      </div>
-    </div>
-  );
-}
+      {/* Hero panel */}
+      <div className="w-[600px] flex-shrink-0 relative overflow-hidden flex flex-col"
+        style={{ background: "linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #3B82F6 100%)", color: "#fff", padding: 56 }}>
+        {/* Decorative circles */}
+        <svg className="absolute" style={{ top: -120, right: -120, opacity: 0.18 }} width="500" height="500" viewBox="0 0 500 500">
+          <circle cx="250" cy="250" r="240" fill="none" stroke="white" strokeWidth="1"/>
+          <circle cx="250" cy="250" r="180" fill="none" stroke="white" strokeWidth="1"/>
+          <circle cx="250" cy="250" r="120" fill="none" stroke="white" strokeWidth="1"/>
+          <circle cx="250" cy="250" r="60" fill="none" stroke="white" strokeWidth="1"/>
+        </svg>
+        {/* ECG line */}
+        <svg className="absolute" style={{ bottom: 60, left: 40, opacity: 0.25 }} width="520" height="80" viewBox="0 0 520 80" fill="none">
+          <path d="M0 40 L60 40 L80 10 L100 70 L120 20 L140 60 L160 40 L520 40" stroke="white" strokeWidth="1.5"/>
+        </svg>
 
-interface FormFieldProps {
-  label: string;
-  icon: React.ReactNode;
-  type: string;
-  required?: boolean;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-}
-
-function FormField({ label, icon, type, required, value, onChange, placeholder }: FormFieldProps) {
-  return (
-    <div className="space-y-1.5">
-      <label className="text-[11px] font-semibold text-text-secondary ml-0.5 uppercase tracking-wider">
-        {label}
-      </label>
-      <div className="relative group">
-        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-text-muted group-focus-within:text-accent transition-colors">
-          {icon}
+        {/* Logo */}
+        <div className="flex items-center gap-3 relative">
+          <div className="w-9 h-9 rounded-[10px] flex items-center justify-center border" style={{ background: "rgba(255,255,255,0.15)", borderColor: "rgba(255,255,255,0.25)", backdropFilter: "blur(10px)" }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M3 12h4l2-7 4 14 2-7h6"/>
+            </svg>
+          </div>
+          <div className="flex items-baseline gap-1.5 text-[18px] font-semibold">
+            <span>Ashwini</span>
+            <span style={{ color: "rgba(255,255,255,0.6)", fontWeight: 500 }}>HMS</span>
+          </div>
         </div>
-        <input
-          type={type}
-          required={required}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full pl-10 pr-3.5 py-3 bg-surface-2 border border-border-subtle rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/15 focus:border-accent transition-all"
-          placeholder={placeholder}
-        />
+
+        <div className="flex-1" />
+
+        <div className="relative z-10">
+          <p className="text-[13px] font-medium mb-3 tracking-wide" style={{ opacity: 0.7 }}>THE OPERATING SYSTEM FOR INDIAN HOSPITALS</p>
+          <h1 className="text-[40px] font-semibold leading-[1.15] tracking-tight mb-4">
+            One platform for the<br/>entire hospital lifecycle.
+          </h1>
+          <p className="text-[15px] leading-relaxed mb-8 max-w-[460px]" style={{ opacity: 0.78 }}>
+            From OP registration through inpatient discharge — clinical, pharmacy, lab, radiology and billing, unified under a HIPAA-aware role model.
+          </p>
+          <div className="flex gap-6 pt-6" style={{ borderTop: "1px solid rgba(255,255,255,0.15)" }}>
+            {[["142", "Hospitals"], ["18.4M", "Patient files"], ["99.99%", "Uptime"]].map(([n, l]) => (
+              <div key={l}>
+                <div className="text-[22px] font-semibold">{n}</div>
+                <div className="text-[11px] tracking-wide" style={{ opacity: 0.7 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
